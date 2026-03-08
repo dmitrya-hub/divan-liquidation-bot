@@ -264,8 +264,8 @@ def parse_products_with_browser():
         price = "Цена не найдена"
         if card_text:
             price_match = re.search(r"(\d[\d\s]*\s?руб\.)", card_text)
-        if price_match:
-            price = price_match.group(1)
+            if price_match:
+                price = price_match.group(1)
 
         products.append({
             "url": href,
