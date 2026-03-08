@@ -100,21 +100,38 @@ def extract_total_products(page):
     return None
 
 
-def extract_price_from_text(text: str) -> str | None:
+def extract_price_candidates(text: str):
     if not text:
-        return None
+        return []
 
-    patterns = [
-        r"(\d[\d\s]*\s?руб\.?)",
-        r"(\d[\d\s]*\s?₽)",
-    ]
+    matches = re.findall(r"(\d[\d\s]*\s?(?:руб\.?|₽))", text, flags=re.IGNORECASE)
+    prices = []
 
-    for pattern in patterns:
-        m = re.search(pattern, text, re.IGNORECASE)
-        if m:
-            return normalize_text(m.group(1))
+    for raw in matches:
+        digits = re.sub(r"[^\d]", "", raw)
+        if not digits:
+            continue
+        try:
+            value = int(digits)
+        except ValueError:
+            continue
+        if value > 0:
+            prices.append(value)
 
-    return None
+    return prices
+
+
+def format_price(value: int | None) -> str:
+    if value is None:
+        return "Цена не найдена"
+    return f"{value:,}".replace(",", " ") + " руб."
+
+
+def pick_actual_price(text: str) -> str:
+    prices = extract_price_candidates(text)
+    if not prices:
+        return "Цена не найдена"
+    return format_price(min(prices))
 
 
 def fetch_price_from_product_page(browser, product_url: str) -> str:
@@ -125,16 +142,14 @@ def fetch_price_from_product_page(browser, product_url: str) -> str:
             "Chrome/122.0.0.0 Safari/537.36"
         ),
         locale="ru-RU",
-        viewport={"width": 1440, "height": 2000},
+        viewport={"width": 1440, "height": 2200},
     )
 
     try:
         page.goto(product_url, wait_until="domcontentloaded", timeout=60000)
         page.wait_for_timeout(2500)
-
         body_text = page.locator("body").inner_text()
-        price = extract_price_from_text(body_text)
-        return price or "Цена не найдена"
+        return pick_actual_price(body_text)
     except Exception as e:
         print(f"Не удалось получить цену со страницы товара {product_url}: {e}")
         return "Цена не найдена"
@@ -210,15 +225,19 @@ def parse_products_with_browser():
                 let imageUrl = "";
 
                 let el = a;
-                for (let i = 0; i < 10 && el; i++) {
+                for (let i = 0; i < 12 && el; i++) {
                     const t = (el.innerText || el.textContent || "").trim();
-                    if (
+
+                    if (!cardText && (
                         t.includes("В наличии:") ||
                         t.includes("Изменить опции") ||
-                        t.includes("руб.")
-                    ) {
+                        t.includes("руб.") ||
+                        t.includes("₽")
+                    )) {
                         cardText = t;
+                    }
 
+                    if (!imageUrl) {
                         const img = el.querySelector("img");
                         if (img) {
                             imageUrl =
@@ -227,8 +246,8 @@ def parse_products_with_browser():
                                 img.getAttribute("data-src") ||
                                 "";
                         }
-                        break;
                     }
+
                     el = el.parentElement;
                 }
 
@@ -247,7 +266,11 @@ def parse_products_with_browser():
             })
         """)
 
-        grouped = defaultdict(lambda: {"texts": set(), "card_text": "", "image_url": ""})
+        grouped = defaultdict(lambda: {
+            "texts": set(),
+            "card_texts": [],
+            "image_url": ""
+        })
 
         for item in raw_items:
             href = normalize_text(item.get("href") or "")
@@ -261,8 +284,8 @@ def parse_products_with_browser():
             if text:
                 grouped[href]["texts"].add(text)
 
-            if card_text and len(card_text) > len(grouped[href]["card_text"]):
-                grouped[href]["card_text"] = card_text
+            if card_text:
+                grouped[href]["card_texts"].append(card_text)
 
             if image_url and not grouped[href]["image_url"]:
                 grouped[href]["image_url"] = image_url
@@ -271,7 +294,7 @@ def parse_products_with_browser():
 
         for href, data in grouped.items():
             texts = list(data["texts"])
-            card_text = data["card_text"]
+            all_card_text = " | ".join(data["card_texts"])
             image_url = data["image_url"]
 
             candidate_names = [
@@ -284,12 +307,13 @@ def parse_products_with_browser():
 
             name = max(candidate_names, key=len) if candidate_names else ""
 
-            if not name and card_text:
-                lines = [x.strip() for x in card_text.splitlines() if x.strip()]
+            if not name and all_card_text:
+                lines = [x.strip() for x in all_card_text.split("|") if x.strip()]
                 for line in lines:
                     low = line.lower()
                     if (
                         "руб." not in low
+                        and "₽" not in low
                         and "в наличии" not in low
                         and "изменить опции" not in low
                         and "купить" not in low
@@ -305,8 +329,7 @@ def parse_products_with_browser():
             if product_type not in ALLOWED_TYPES:
                 continue
 
-            price = extract_price_from_text(card_text) or "Цена не найдена"
-
+            price = pick_actual_price(all_card_text)
             if price == "Цена не найдена":
                 price = fetch_price_from_product_page(browser, href)
 
