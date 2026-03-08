@@ -14,6 +14,12 @@ STATE_FILE = Path("state.json")
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
 
+ALLOWED_TYPES = {
+    "Диван прямой",
+    "Диван угловой",
+    "Кровать",
+}
+
 
 def load_state():
     if STATE_FILE.exists():
@@ -42,6 +48,52 @@ def send_telegram_message(text):
         timeout=30,
     )
     resp.raise_for_status()
+
+
+def send_telegram_photo(photo_url, name, price, product_url):
+    if not BOT_TOKEN or not CHAT_ID:
+        raise RuntimeError("Не заданы BOT_TOKEN или CHAT_ID")
+
+    caption = (
+        f"{name}\n"
+        f"{price}\n"
+        f"{product_url}"
+    )
+
+    api_url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendPhoto"
+    resp = requests.post(
+        api_url,
+        data={
+            "chat_id": CHAT_ID,
+            "photo": photo_url,
+            "caption": caption[:1024],
+        },
+        timeout=30,
+    )
+
+    if resp.status_code != 200:
+        print(f"Не удалось отправить фото, отправляю текстом: {resp.text}")
+        send_telegram_message(caption)
+        return
+
+    resp.raise_for_status()
+
+
+def detect_product_type(name: str):
+    low = name.lower().strip()
+
+    if low.startswith("диван прямой"):
+        return "Диван прямой"
+    if low.startswith("диван угловой"):
+        return "Диван угловой"
+    if low.startswith("кровать"):
+        return "Кровать"
+
+    return None
+
+
+def normalize_text(text: str) -> str:
+    return re.sub(r"\s+", " ", text).strip()
 
 
 def parse_products_with_browser():
@@ -74,28 +126,51 @@ def parse_products_with_browser():
                 const text = (a.innerText || a.textContent || "").trim();
 
                 let cardText = "";
+                let imageUrl = "";
+
                 let el = a;
                 for (let i = 0; i < 8 && el; i++) {
                     const t = (el.innerText || el.textContent || "").trim();
-                    if (t.includes("В наличии:")) {
+                    if (t.includes("В наличии:") || t.includes("Изменить опции")) {
                         cardText = t;
+
+                        const img = el.querySelector("img");
+                        if (img) {
+                            imageUrl =
+                                img.src ||
+                                img.getAttribute("src") ||
+                                img.getAttribute("data-src") ||
+                                "";
+                        }
                         break;
                     }
                     el = el.parentElement;
                 }
 
-                return { href, text, cardText };
+                if (!imageUrl) {
+                    const img = a.querySelector("img");
+                    if (img) {
+                        imageUrl =
+                            img.src ||
+                            img.getAttribute("src") ||
+                            img.getAttribute("data-src") ||
+                            "";
+                    }
+                }
+
+                return { href, text, cardText, imageUrl };
             })
         """)
 
         browser.close()
 
-    grouped = defaultdict(lambda: {"texts": set(), "card_text": ""})
+    grouped = defaultdict(lambda: {"texts": set(), "card_text": "", "image_url": ""})
 
     for item in raw_items:
-        href = item["href"]
-        text = (item.get("text") or "").strip()
-        card_text = (item.get("cardText") or "").strip()
+        href = normalize_text(item.get("href") or "")
+        text = normalize_text(item.get("text") or "")
+        card_text = normalize_text(item.get("cardText") or "")
+        image_url = normalize_text(item.get("imageUrl") or "")
 
         if not href:
             continue
@@ -106,11 +181,15 @@ def parse_products_with_browser():
         if card_text and len(card_text) > len(grouped[href]["card_text"]):
             grouped[href]["card_text"] = card_text
 
+        if image_url and not grouped[href]["image_url"]:
+            grouped[href]["image_url"] = image_url
+
     products = []
 
     for href, data in grouped.items():
         texts = list(data["texts"])
         card_text = data["card_text"]
+        image_url = data["image_url"]
 
         candidate_names = [
             t for t in texts
@@ -136,26 +215,25 @@ def parse_products_with_browser():
                     name = line
                     break
 
-        price = "Цена не найдена"
-        stock = ""
-
-        if card_text:
-            price_match = re.search(r"(\d[\d\s]*\s?руб\.)", card_text)
-            if price_match:
-                price = price_match.group(1)
-
-            stock_match = re.search(r"В наличии:\s*(\d+)\s*шт", card_text)
-            if stock_match:
-                stock = stock_match.group(1)
-
         if not name:
             continue
+
+        product_type = detect_product_type(name)
+        if product_type not in ALLOWED_TYPES:
+            continue
+
+        price = "Цена не найдена"
+        if card_text:
+            price_match = re.search(r"(\\d[\\d\\s]*\\s?руб\\.)", card_text)
+            if price_match:
+                price = price_match.group(1)
 
         products.append({
             "url": href,
             "name": name,
+            "type": product_type,
             "price": price,
-            "stock": stock,
+            "image_url": image_url,
         })
 
     return products
@@ -163,10 +241,10 @@ def parse_products_with_browser():
 
 def main():
     products = parse_products_with_browser()
-    print(f"Найдено товаров после очистки: {len(products)}")
+    print(f"Найдено товаров после фильтрации: {len(products)}")
 
     if not products:
-        print("Товары не найдены")
+        print("Подходящие товары не найдены")
         return 0
 
     state = load_state()
@@ -182,17 +260,20 @@ def main():
 
     if new_products:
         for p in new_products:
-            stock_part = f"\nОстаток: {p['stock']} шт." if p["stock"] else ""
-            text = (
-                f"🆕 Новый товар в ликвидации Divan.ru\n\n"
-                f"{p['name']}\n"
-                f"{p['price']}{stock_part}\n"
-                f"{p['url']}"
-            )
-            send_telegram_message(text)
-            print(f"Отправлено: {p['name']}")
+            if p["image_url"]:
+                send_telegram_photo(
+                    photo_url=p["image_url"],
+                    name=p["name"],
+                    price=p["price"],
+                    product_url=p["url"],
+                )
+                print(f"Отправлено с фото: {p['name']}")
+            else:
+                text = f"{p['name']}\n{p['price']}\n{p['url']}"
+                send_telegram_message(text)
+                print(f"Отправлено без фото: {p['name']}")
     else:
-        print("Новых товаров нет.")
+        print("Новых подходящих товаров нет.")
 
     save_state({"seen": sorted(current_urls)})
     return 0
