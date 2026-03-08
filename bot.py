@@ -1,6 +1,8 @@
 import json
 import os
+import re
 import sys
+from collections import defaultdict
 from pathlib import Path
 
 import requests
@@ -43,8 +45,6 @@ def send_telegram_message(text):
 
 
 def parse_products_with_browser():
-    products = []
-
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         page = browser.new_page(
@@ -54,59 +54,92 @@ def parse_products_with_browser():
                 "Chrome/122.0.0.0 Safari/537.36"
             ),
             locale="ru-RU",
-            viewport={"width": 1440, "height": 2400},
+            viewport={"width": 1440, "height": 2600},
         )
 
         page.goto(URL, wait_until="domcontentloaded", timeout=60000)
         page.wait_for_timeout(5000)
 
-        # Прокрутка для догрузки карточек
         for _ in range(6):
             page.mouse.wheel(0, 3000)
             page.wait_for_timeout(1500)
 
-        # Все ссылки на товары
         links = page.locator('a[href*="/product/"]')
         count = links.count()
         print(f"Найдено ссылок /product/: {count}")
 
-        seen = set()
+        raw_items = links.evaluate_all("""
+            (els) => els.map((a) => {
+                const href = a.href || "";
+                const text = (a.innerText || a.textContent || "").trim();
 
-        for i in range(count):
-            link = links.nth(i)
-            href = link.get_attribute("href")
-            if not href:
-                continue
+                let cardText = "";
+                let el = a;
+                for (let i = 0; i < 8 && el; i++) {
+                    const t = (el.innerText || el.textContent || "").trim();
+                    if (t.includes("В наличии:")) {
+                        cardText = t;
+                        break;
+                    }
+                    el = el.parentElement;
+                }
 
-            if href.startswith("/"):
-                href = "https://www.divan.ru" + href
+                return { href, text, cardText };
+            })
+        """)
 
-            if href in seen:
-                continue
-            seen.add(href)
+        browser.close()
 
-            text = (link.inner_text() or "").strip()
-            if not text:
-                continue
+    grouped = defaultdict(lambda: {"texts": set(), "card_text": ""})
 
-            # Отбрасываем мусорные ссылки без названия товара
-            if text.lower() == "купить":
-                continue
-            if len(text) < 5:
-                continue
+    for item in raw_items:
+        href = item["href"]
+        text = (item.get("text") or "").strip()
+        card_text = (item.get("cardText") or "").strip()
 
-            # Пытаемся взять текст карточки рядом
-            card_text = ""
-            try:
-                card_text = link.locator("xpath=ancestor::*[self::article or self::div][1]").inner_text(timeout=1000)
-            except Exception:
-                pass
+        if not href:
+            continue
 
-            price = "Цена не найдена"
-            stock = ""
+        if text:
+            grouped[href]["texts"].add(text)
 
-            import re
+        if card_text and len(card_text) > len(grouped[href]["card_text"]):
+            grouped[href]["card_text"] = card_text
 
+    products = []
+
+    for href, data in grouped.items():
+        texts = list(data["texts"])
+        card_text = data["card_text"]
+
+        candidate_names = [
+            t for t in texts
+            if t
+            and t.lower() != "купить"
+            and "image" not in t.lower()
+            and len(t) >= 5
+        ]
+
+        name = max(candidate_names, key=len) if candidate_names else ""
+
+        if not name and card_text:
+            lines = [x.strip() for x in card_text.splitlines() if x.strip()]
+            for line in lines:
+                low = line.lower()
+                if (
+                    "руб." not in low
+                    and "в наличии" not in low
+                    and "изменить опции" not in low
+                    and "купить" not in low
+                    and len(line) >= 5
+                ):
+                    name = line
+                    break
+
+        price = "Цена не найдена"
+        stock = ""
+
+        if card_text:
             price_match = re.search(r"(\d[\d\s]*\s?руб\.)", card_text)
             if price_match:
                 price = price_match.group(1)
@@ -115,24 +148,17 @@ def parse_products_with_browser():
             if stock_match:
                 stock = stock_match.group(1)
 
-            products.append({
-                "url": href,
-                "name": text,
-                "price": price,
-                "stock": stock,
-            })
-
-        browser.close()
-
-    # Фильтр дублей и мусора
-    cleaned = {}
-    for p in products:
-        name = p["name"].strip()
-        if any(x in name.lower() for x in ["купить", "image"]):
+        if not name:
             continue
-        cleaned[p["url"]] = p
 
-    return list(cleaned.values())
+        products.append({
+            "url": href,
+            "name": name,
+            "price": price,
+            "stock": stock,
+        })
+
+    return products
 
 
 def main():
@@ -141,7 +167,7 @@ def main():
 
     if not products:
         print("Товары не найдены")
-        return 1
+        return 0
 
     state = load_state()
     seen = set(state.get("seen", []))
