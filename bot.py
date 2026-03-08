@@ -92,7 +92,7 @@ def normalize_text(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
-def extract_total_products(page) -> int | None:
+def extract_total_products(page):
     body_text = page.locator("body").inner_text()
     m = re.search(r"Смотреть все товары\s+(\d+)", body_text)
     if m:
@@ -129,8 +129,6 @@ def scroll_until_all_loaded(page):
 
         page.mouse.wheel(0, 5000)
         page.wait_for_timeout(2000)
-
-        # Иногда помогает принудительный скролл к нижней части документа
         page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
         page.wait_for_timeout(1500)
 
@@ -265,7 +263,7 @@ def parse_products_with_browser():
 
         price = "Цена не найдена"
         if card_text:
-            price_match = re.search(r"(\d[\d\s]*\s?руб\.)", card_text)
+            price_match = re.search(r"(\\d[\\d\\s]*\\s?руб\\.)", card_text)
             if price_match:
                 price = price_match.group(1)
 
@@ -299,11 +297,6 @@ def main():
 
     current_urls = {p["url"] for p in products}
     new_products = [p for p in products if p["url"] not in seen]
-
-    if not seen:
-        print(f"Первый запуск. Сохраняю {len(current_urls)} товаров без отправки уведомлений.")
-        save_state({"seen": sorted(current_urls)})
-        return 0
 
     if new_products:
         for p in new_products:
