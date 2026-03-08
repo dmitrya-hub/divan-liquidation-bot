@@ -1,8 +1,9 @@
 name: Check Divan liquidation
+run-name: "Divan check • ${{ github.event_name }} • ${{ github.ref_name }}"
 
 on:
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "2,7,12,17,22,27,32,37,42,47,52,57 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -34,6 +35,8 @@ jobs:
 
       - name: Show run time
         run: |
+          echo "Event: ${{ github.event_name }}"
+          echo "Ref: ${{ github.ref_name }}"
           echo "UTC time:"
           date -u
 
@@ -85,7 +88,8 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           git fetch origin main
-          git reset --soft origin/main
+          git checkout main
+          git reset --hard origin/main
 
           git add state.json
 
@@ -95,4 +99,4 @@ jobs:
           fi
 
           git commit -m "Update state.json"
-          git push origin HEAD:main
+          git push origin main
