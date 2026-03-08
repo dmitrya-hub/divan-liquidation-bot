@@ -44,19 +44,18 @@ jobs:
           CHAT_ID: ${{ secrets.CHAT_ID }}
         run: python bot.py
 
-      - name: Merge state with remote
+      - name: Merge local and remote state
         run: |
           git fetch origin main
           git show origin/main:state.json > remote_state.json || echo '{"seen":[]}' > remote_state.json
+          cp state.json local_state.json
 
           python - <<'PY'
           import json
           from pathlib import Path
 
-          local_path = Path("state.json")
-          remote_path = Path("remote_state.json")
-
-          def load(path):
+          def load_json(path_str):
+              path = Path(path_str)
               if not path.exists():
                   return {"seen": []}
               try:
@@ -64,30 +63,28 @@ jobs:
               except Exception:
                   return {"seen": []}
 
-          local_data = load(local_path)
-          remote_data = load(remote_path)
+          local_data = load_json("local_state.json")
+          remote_data = load_json("remote_state.json")
 
           local_seen = set(local_data.get("seen", []))
           remote_seen = set(remote_data.get("seen", []))
 
-          merged = sorted(local_seen | remote_seen)
+          merged_seen = sorted(local_seen | remote_seen)
 
-          local_path.write_text(
-              json.dumps({"seen": merged}, ensure_ascii=False, indent=2),
+          Path("state.json").write_text(
+              json.dumps({"seen": merged_seen}, ensure_ascii=False, indent=2),
               encoding="utf-8"
           )
 
-          print(f"Merged state size: {len(merged)}")
+          print(f"Local seen: {len(local_seen)}")
+          print(f"Remote seen: {len(remote_seen)}")
+          print(f"Merged seen: {len(merged_seen)}")
           PY
 
       - name: Commit updated state
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          git fetch origin main
-          git checkout main
-          git reset --hard origin/main
 
           git add state.json
 
@@ -97,4 +94,4 @@ jobs:
           fi
 
           git commit -m "Update state.json"
-          git push origin main
+          git push origin HEAD:main
