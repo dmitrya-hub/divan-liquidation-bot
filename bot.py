@@ -54,11 +54,7 @@ def send_telegram_photo(photo_url, name, price, product_url):
     if not BOT_TOKEN or not CHAT_ID:
         raise RuntimeError("Не заданы BOT_TOKEN или CHAT_ID")
 
-    caption = (
-        f"{name}\n"
-        f"{price}\n"
-        f"{product_url}"
-    )
+    caption = f"{name}\n{price}\n{product_url}"
 
     api_url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendPhoto"
     resp = requests.post(
@@ -96,6 +92,49 @@ def normalize_text(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
+def extract_total_products(page) -> int | None:
+    body_text = page.locator("body").inner_text()
+    m = re.search(r"Смотреть все товары\s+(\d+)", body_text)
+    if m:
+        return int(m.group(1))
+    return None
+
+
+def scroll_until_all_loaded(page):
+    expected_total = extract_total_products(page)
+    print(f"Ожидаемое количество товаров по странице: {expected_total}")
+
+    prev_count = 0
+    stable_rounds = 0
+    max_rounds = 60
+
+    for round_num in range(1, max_rounds + 1):
+        current_count = page.locator('a[href*="/product/"]').count()
+        print(f"Скролл {round_num}: найдено ссылок /product/: {current_count}")
+
+        if expected_total and current_count >= expected_total:
+            print("Достигли ожидаемого общего количества товаров.")
+            break
+
+        if current_count == prev_count:
+            stable_rounds += 1
+        else:
+            stable_rounds = 0
+
+        if stable_rounds >= 4:
+            print("Количество ссылок перестало расти, завершаю прокрутку.")
+            break
+
+        prev_count = current_count
+
+        page.mouse.wheel(0, 5000)
+        page.wait_for_timeout(2000)
+
+        # Иногда помогает принудительный скролл к нижней части документа
+        page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+        page.wait_for_timeout(1500)
+
+
 def parse_products_with_browser():
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -112,13 +151,15 @@ def parse_products_with_browser():
         page.goto(URL, wait_until="domcontentloaded", timeout=60000)
         page.wait_for_timeout(5000)
 
-        for _ in range(6):
-            page.mouse.wheel(0, 3000)
-            page.wait_for_timeout(1500)
+        page_text = page.locator("body").inner_text()
+        if "Москва" not in page_text:
+            print("Внимание: страница не выглядит как московская версия")
+
+        scroll_until_all_loaded(page)
 
         links = page.locator('a[href*="/product/"]')
         count = links.count()
-        print(f"Найдено ссылок /product/: {count}")
+        print(f"Итоговое число ссылок /product/: {count}")
 
         raw_items = links.evaluate_all("""
             (els) => els.map((a) => {
@@ -129,7 +170,7 @@ def parse_products_with_browser():
                 let imageUrl = "";
 
                 let el = a;
-                for (let i = 0; i < 8 && el; i++) {
+                for (let i = 0; i < 10 && el; i++) {
                     const t = (el.innerText || el.textContent || "").trim();
                     if (t.includes("В наличии:") || t.includes("Изменить опции")) {
                         cardText = t;
@@ -224,7 +265,7 @@ def parse_products_with_browser():
 
         price = "Цена не найдена"
         if card_text:
-            price_match = re.search(r"(\\d[\\d\\s]*\\s?руб\\.)", card_text)
+            price_match = re.search(r"(\d[\d\s]*\s?руб\.)", card_text)
             if price_match:
                 price = price_match.group(1)
 
@@ -241,7 +282,13 @@ def parse_products_with_browser():
 
 def main():
     products = parse_products_with_browser()
+
+    type_stats = {}
+    for p in products:
+        type_stats[p["type"]] = type_stats.get(p["type"], 0) + 1
+
     print(f"Найдено товаров после фильтрации: {len(products)}")
+    print(f"По типам: {type_stats}")
 
     if not products:
         print("Подходящие товары не найдены")
