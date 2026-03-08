@@ -2,7 +2,7 @@ name: Check Divan liquidation
 
 on:
   schedule:
-    - cron: "7,22,37,52 * * * *"
+    - cron: "*/5 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -37,5 +39,10 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add state.json
-          git diff --cached --quiet || git commit -m "Update state.json"
-          git push
+          if git diff --cached --quiet; then
+            echo "Нет изменений в state.json"
+          else
+            git commit -m "Update state.json"
+            git pull --rebase origin main
+            git push origin main
+          fi
