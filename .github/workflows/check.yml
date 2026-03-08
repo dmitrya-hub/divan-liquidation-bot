@@ -84,6 +84,9 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
+          git fetch origin main
+          git reset --soft origin/main
+
           git add state.json
 
           if git diff --cached --quiet; then
@@ -91,7 +94,5 @@ jobs:
             exit 0
           fi
 
-          git pull --rebase origin main || true
-          git add state.json
-          git commit -m "Update state.json" || echo "Нечего коммитить"
-          git push origin main
+          git commit -m "Update state.json"
+          git push origin HEAD:main
