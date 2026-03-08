@@ -100,6 +100,48 @@ def extract_total_products(page):
     return None
 
 
+def extract_price_from_text(text: str) -> str | None:
+    if not text:
+        return None
+
+    patterns = [
+        r"(\d[\d\s]*\s?руб\.?)",
+        r"(\d[\d\s]*\s?₽)",
+    ]
+
+    for pattern in patterns:
+        m = re.search(pattern, text, re.IGNORECASE)
+        if m:
+            return normalize_text(m.group(1))
+
+    return None
+
+
+def fetch_price_from_product_page(browser, product_url: str) -> str:
+    page = browser.new_page(
+        user_agent=(
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/122.0.0.0 Safari/537.36"
+        ),
+        locale="ru-RU",
+        viewport={"width": 1440, "height": 2000},
+    )
+
+    try:
+        page.goto(product_url, wait_until="domcontentloaded", timeout=60000)
+        page.wait_for_timeout(2500)
+
+        body_text = page.locator("body").inner_text()
+        price = extract_price_from_text(body_text)
+        return price or "Цена не найдена"
+    except Exception as e:
+        print(f"Не удалось получить цену со страницы товара {product_url}: {e}")
+        return "Цена не найдена"
+    finally:
+        page.close()
+
+
 def scroll_until_all_loaded(page):
     expected_total = extract_total_products(page)
     print(f"Ожидаемое количество товаров по странице: {expected_total}")
@@ -170,7 +212,11 @@ def parse_products_with_browser():
                 let el = a;
                 for (let i = 0; i < 10 && el; i++) {
                     const t = (el.innerText || el.textContent || "").trim();
-                    if (t.includes("В наличии:") || t.includes("Изменить опции")) {
+                    if (
+                        t.includes("В наличии:") ||
+                        t.includes("Изменить опции") ||
+                        t.includes("руб.")
+                    ) {
                         cardText = t;
 
                         const img = el.querySelector("img");
@@ -201,79 +247,78 @@ def parse_products_with_browser():
             })
         """)
 
+        grouped = defaultdict(lambda: {"texts": set(), "card_text": "", "image_url": ""})
+
+        for item in raw_items:
+            href = normalize_text(item.get("href") or "")
+            text = normalize_text(item.get("text") or "")
+            card_text = normalize_text(item.get("cardText") or "")
+            image_url = normalize_text(item.get("imageUrl") or "")
+
+            if not href:
+                continue
+
+            if text:
+                grouped[href]["texts"].add(text)
+
+            if card_text and len(card_text) > len(grouped[href]["card_text"]):
+                grouped[href]["card_text"] = card_text
+
+            if image_url and not grouped[href]["image_url"]:
+                grouped[href]["image_url"] = image_url
+
+        products = []
+
+        for href, data in grouped.items():
+            texts = list(data["texts"])
+            card_text = data["card_text"]
+            image_url = data["image_url"]
+
+            candidate_names = [
+                t for t in texts
+                if t
+                and t.lower() != "купить"
+                and "image" not in t.lower()
+                and len(t) >= 5
+            ]
+
+            name = max(candidate_names, key=len) if candidate_names else ""
+
+            if not name and card_text:
+                lines = [x.strip() for x in card_text.splitlines() if x.strip()]
+                for line in lines:
+                    low = line.lower()
+                    if (
+                        "руб." not in low
+                        and "в наличии" not in low
+                        and "изменить опции" not in low
+                        and "купить" not in low
+                        and len(line) >= 5
+                    ):
+                        name = line
+                        break
+
+            if not name:
+                continue
+
+            product_type = detect_product_type(name)
+            if product_type not in ALLOWED_TYPES:
+                continue
+
+            price = extract_price_from_text(card_text) or "Цена не найдена"
+
+            if price == "Цена не найдена":
+                price = fetch_price_from_product_page(browser, href)
+
+            products.append({
+                "url": href,
+                "name": name,
+                "type": product_type,
+                "price": price,
+                "image_url": image_url,
+            })
+
         browser.close()
-
-    grouped = defaultdict(lambda: {"texts": set(), "card_text": "", "image_url": ""})
-
-    for item in raw_items:
-        href = normalize_text(item.get("href") or "")
-        text = normalize_text(item.get("text") or "")
-        card_text = normalize_text(item.get("cardText") or "")
-        image_url = normalize_text(item.get("imageUrl") or "")
-
-        if not href:
-            continue
-
-        if text:
-            grouped[href]["texts"].add(text)
-
-        if card_text and len(card_text) > len(grouped[href]["card_text"]):
-            grouped[href]["card_text"] = card_text
-
-        if image_url and not grouped[href]["image_url"]:
-            grouped[href]["image_url"] = image_url
-
-    products = []
-
-    for href, data in grouped.items():
-        texts = list(data["texts"])
-        card_text = data["card_text"]
-        image_url = data["image_url"]
-
-        candidate_names = [
-            t for t in texts
-            if t
-            and t.lower() != "купить"
-            and "image" not in t.lower()
-            and len(t) >= 5
-        ]
-
-        name = max(candidate_names, key=len) if candidate_names else ""
-
-        if not name and card_text:
-            lines = [x.strip() for x in card_text.splitlines() if x.strip()]
-            for line in lines:
-                low = line.lower()
-                if (
-                    "руб." not in low
-                    and "в наличии" not in low
-                    and "изменить опции" not in low
-                    and "купить" not in low
-                    and len(line) >= 5
-                ):
-                    name = line
-                    break
-
-        if not name:
-            continue
-
-        product_type = detect_product_type(name)
-        if product_type not in ALLOWED_TYPES:
-            continue
-
-        price = "Цена не найдена"
-        if card_text:
-            price_match = re.search(r"(\d[\d\s]*\s?руб\.)", card_text)
-            if price_match:
-                price = price_match.group(1)
-
-        products.append({
-            "url": href,
-            "name": name,
-            "type": product_type,
-            "price": price,
-            "image_url": image_url,
-        })
 
     return products
 
@@ -307,11 +352,11 @@ def main():
                     price=p["price"],
                     product_url=p["url"],
                 )
-                print(f"Отправлено с фото: {p['name']}")
+                print(f"Отправлено с фото: {p['name']} | {p['price']}")
             else:
                 text = f"{p['name']}\n{p['price']}\n{p['url']}"
                 send_telegram_message(text)
-                print(f"Отправлено без фото: {p['name']}")
+                print(f"Отправлено без фото: {p['name']} | {p['price']}")
     else:
         print("Новых подходящих товаров нет.")
 
