@@ -8,6 +8,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: divan-liquidation-bot-main
+  cancel-in-progress: true
+
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -28,21 +32,66 @@ jobs:
           pip install -r requirements.txt
           python -m playwright install chromium
 
+      - name: Show run time
+        run: |
+          echo "UTC time:"
+          date -u
+
       - name: Run bot
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
         run: python bot.py
 
+      - name: Merge state with remote
+        run: |
+          git fetch origin main
+          git show origin/main:state.json > remote_state.json || echo '{"seen":[]}' > remote_state.json
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          local_path = Path("state.json")
+          remote_path = Path("remote_state.json")
+
+          def load(path):
+              if not path.exists():
+                  return {"seen": []}
+              try:
+                  return json.loads(path.read_text(encoding="utf-8"))
+              except Exception:
+                  return {"seen": []}
+
+          local_data = load(local_path)
+          remote_data = load(remote_path)
+
+          local_seen = set(local_data.get("seen", []))
+          remote_seen = set(remote_data.get("seen", []))
+
+          merged = sorted(local_seen | remote_seen)
+
+          local_path.write_text(
+              json.dumps({"seen": merged}, ensure_ascii=False, indent=2),
+              encoding="utf-8"
+          )
+
+          print(f"Merged state size: {len(merged)}")
+          PY
+
       - name: Commit updated state
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
           git add state.json
+
           if git diff --cached --quiet; then
             echo "Нет изменений в state.json"
-          else
-            git commit -m "Update state.json"
-            git pull --rebase origin main
-            git push origin main
+            exit 0
           fi
+
+          git pull --rebase origin main || true
+          git add state.json
+          git commit -m "Update state.json" || echo "Нечего коммитить"
+          git push origin main
