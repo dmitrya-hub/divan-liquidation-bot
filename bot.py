@@ -4,11 +4,12 @@ import re
 import sys
 from collections import defaultdict
 from pathlib import Path
+from urllib.parse import quote_plus
 
 import requests
 from playwright.sync_api import sync_playwright
 
-URL = "https://www.divan.ru/category/likvidatsiya"
+URL = "https://www.divan.ru/category/rasprodaza-mebeli?types%5B%5D=1&types%5B%5D=4&types%5B%5D=43&defect=1"
 STATE_FILE = Path("state.json")
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
@@ -18,6 +19,14 @@ ALLOWED_TYPES = {
     "Диван прямой",
     "Диван угловой",
     "Кровать",
+}
+
+HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/122.0.0.0 Safari/537.36"
+    )
 }
 
 
@@ -75,6 +84,10 @@ def send_telegram_photo(photo_url, name, price, product_url):
     resp.raise_for_status()
 
 
+def normalize_text(text: str) -> str:
+    return re.sub(r"\s+", " ", text).strip()
+
+
 def detect_product_type(name: str):
     low = name.lower().strip()
 
@@ -88,15 +101,18 @@ def detect_product_type(name: str):
     return None
 
 
-def normalize_text(text: str) -> str:
-    return re.sub(r"\s+", " ", text).strip()
-
-
 def extract_total_products(page):
     body_text = page.locator("body").inner_text()
-    m = re.search(r"Смотреть все товары\s+(\d+)", body_text)
-    if m:
-        return int(m.group(1))
+    patterns = [
+        r"Показать\s+(\d+)\s+товар",
+        r"Показать\s+(\d+)\s+товаров",
+        r"Смотреть все товары\s+(\d+)",
+        r"Найдено\s+(\d+)",
+    ]
+    for pattern in patterns:
+        m = re.search(pattern, body_text, flags=re.IGNORECASE)
+        if m:
+            return int(m.group(1))
     return None
 
 
@@ -121,40 +137,17 @@ def extract_price_candidates(text: str):
     return prices
 
 
-def format_price(value: int | None) -> str:
+def format_price(value):
     if value is None:
         return "Цена не найдена"
     return f"{value:,}".replace(",", " ") + " руб."
 
 
-def pick_actual_price(text: str) -> str:
+def pick_actual_price(text: str):
     prices = extract_price_candidates(text)
     if not prices:
         return "Цена не найдена"
     return format_price(min(prices))
-
-
-def fetch_price_from_product_page(browser, product_url: str) -> str:
-    page = browser.new_page(
-        user_agent=(
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/122.0.0.0 Safari/537.36"
-        ),
-        locale="ru-RU",
-        viewport={"width": 1440, "height": 2200},
-    )
-
-    try:
-        page.goto(product_url, wait_until="domcontentloaded", timeout=60000)
-        page.wait_for_timeout(2500)
-        body_text = page.locator("body").inner_text()
-        return pick_actual_price(body_text)
-    except Exception as e:
-        print(f"Не удалось получить цену со страницы товара {product_url}: {e}")
-        return "Цена не найдена"
-    finally:
-        page.close()
 
 
 def scroll_until_all_loaded(page):
@@ -163,7 +156,7 @@ def scroll_until_all_loaded(page):
 
     prev_count = 0
     stable_rounds = 0
-    max_rounds = 60
+    max_rounds = 80
 
     for round_num in range(1, max_rounds + 1):
         current_count = page.locator('a[href*="/product/"]').count()
@@ -184,30 +177,95 @@ def scroll_until_all_loaded(page):
 
         prev_count = current_count
 
-        page.mouse.wheel(0, 5000)
-        page.wait_for_timeout(2000)
+        page.mouse.wheel(0, 6000)
+        page.wait_for_timeout(1800)
         page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-        page.wait_for_timeout(1500)
+        page.wait_for_timeout(1400)
+
+
+def resolve_final_product_url(product_url: str, name: str) -> str:
+    """
+    Пытаемся получить реально рабочую карточку товара.
+    Если product_url редиректит на категорию, пробуем найти canonical product URL.
+    Если не удалось — возвращаем исходный URL.
+    """
+    try:
+        resp = requests.get(
+            product_url,
+            headers=HEADERS,
+            timeout=25,
+            allow_redirects=True,
+        )
+        final_url = resp.url
+
+        if "/product/" in final_url:
+            return final_url
+
+        html = resp.text
+
+        m = re.search(
+            r'<link[^>]+rel=["\']canonical["\'][^>]+href=["\'](https://www\.divan\.ru/product/[^"\']+)["\']',
+            html,
+            flags=re.IGNORECASE,
+        )
+        if m:
+            return m.group(1)
+
+        m = re.search(
+            r'"url"\s*:\s*"(https://www\.divan\.ru/product/[^"]+)"',
+            html,
+            flags=re.IGNORECASE,
+        )
+        if m:
+            return m.group(1)
+
+        m = re.search(
+            r'href=["\'](https://www\.divan\.ru/product/[^"\']+)["\']',
+            html,
+            flags=re.IGNORECASE,
+        )
+        if m:
+            return m.group(1)
+
+        return product_url
+    except Exception as e:
+        print(f"Не удалось резолвить URL {product_url}: {e}")
+        return product_url
+
+
+def fetch_price_from_product_page(browser, product_url: str) -> str:
+    page = browser.new_page(
+        user_agent=HEADERS["User-Agent"],
+        locale="ru-RU",
+        viewport={"width": 1440, "height": 2200},
+    )
+
+    try:
+        page.goto(product_url, wait_until="domcontentloaded", timeout=60000)
+        page.wait_for_timeout(2500)
+        body_text = page.locator("body").inner_text()
+        return pick_actual_price(body_text)
+    except Exception as e:
+        print(f"Не удалось получить цену со страницы товара {product_url}: {e}")
+        return "Цена не найдена"
+    finally:
+        page.close()
 
 
 def parse_products_with_browser():
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         page = browser.new_page(
-            user_agent=(
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) "
-                "Chrome/122.0.0.0 Safari/537.36"
-            ),
+            user_agent=HEADERS["User-Agent"],
             locale="ru-RU",
             viewport={"width": 1440, "height": 2600},
         )
 
         page.goto(URL, wait_until="domcontentloaded", timeout=60000)
-        page.wait_for_timeout(5000)
+        page.wait_for_timeout(4000)
 
-        page_text = page.locator("body").inner_text()
-        if "Москва" not in page_text:
+        body_text = page.locator("body").inner_text()
+        if "Москва" not in body_text:
             print("Внимание: страница не выглядит как московская версия")
 
         scroll_until_all_loaded(page)
@@ -225,7 +283,7 @@ def parse_products_with_browser():
                 let imageUrl = "";
 
                 let el = a;
-                for (let i = 0; i < 12 && el; i++) {
+                for (let i = 0; i < 14 && el; i++) {
                     const t = (el.innerText || el.textContent || "").trim();
 
                     if (!cardText && (
@@ -368,18 +426,20 @@ def main():
 
     if new_products:
         for p in new_products:
+            final_url = resolve_final_product_url(p["url"], p["name"])
+
             if p["image_url"]:
                 send_telegram_photo(
                     photo_url=p["image_url"],
                     name=p["name"],
                     price=p["price"],
-                    product_url=p["url"],
+                    product_url=final_url,
                 )
-                print(f"Отправлено с фото: {p['name']} | {p['price']}")
+                print(f"Отправлено с фото: {p['name']} | {p['price']} | {final_url}")
             else:
-                text = f"{p['name']}\n{p['price']}\n{p['url']}"
+                text = f"{p['name']}\n{p['price']}\n{final_url}"
                 send_telegram_message(text)
-                print(f"Отправлено без фото: {p['name']} | {p['price']}")
+                print(f"Отправлено без фото: {p['name']} | {p['price']} | {final_url}")
     else:
         print("Новых подходящих товаров нет.")
 
