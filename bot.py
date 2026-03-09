@@ -4,7 +4,6 @@ import re
 import sys
 from collections import defaultdict
 from pathlib import Path
-from urllib.parse import quote_plus
 
 import requests
 from playwright.sync_api import sync_playwright
@@ -116,6 +115,17 @@ def extract_total_products(page):
     return None
 
 
+def get_unique_product_urls(page):
+    hrefs = page.locator('a[href*="/product/"]').evaluate_all(
+        """
+        (els) => els
+          .map(a => a.href || "")
+          .filter(Boolean)
+        """
+    )
+    return sorted(set(hrefs))
+
+
 def extract_price_candidates(text: str):
     if not text:
         return []
@@ -150,89 +160,6 @@ def pick_actual_price(text: str):
     return format_price(min(prices))
 
 
-def scroll_until_all_loaded(page):
-    expected_total = extract_total_products(page)
-    print(f"Ожидаемое количество товаров по странице: {expected_total}")
-
-    prev_count = 0
-    stable_rounds = 0
-    max_rounds = 80
-
-    for round_num in range(1, max_rounds + 1):
-        current_count = page.locator('a[href*="/product/"]').count()
-        print(f"Скролл {round_num}: найдено ссылок /product/: {current_count}")
-
-        if expected_total and current_count >= expected_total:
-            print("Достигли ожидаемого общего количества товаров.")
-            break
-
-        if current_count == prev_count:
-            stable_rounds += 1
-        else:
-            stable_rounds = 0
-
-        if stable_rounds >= 4:
-            print("Количество ссылок перестало расти, завершаю прокрутку.")
-            break
-
-        prev_count = current_count
-
-        page.mouse.wheel(0, 6000)
-        page.wait_for_timeout(1800)
-        page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-        page.wait_for_timeout(1400)
-
-
-def resolve_final_product_url(product_url: str, name: str) -> str:
-    """
-    Пытаемся получить реально рабочую карточку товара.
-    Если product_url редиректит на категорию, пробуем найти canonical product URL.
-    Если не удалось — возвращаем исходный URL.
-    """
-    try:
-        resp = requests.get(
-            product_url,
-            headers=HEADERS,
-            timeout=25,
-            allow_redirects=True,
-        )
-        final_url = resp.url
-
-        if "/product/" in final_url:
-            return final_url
-
-        html = resp.text
-
-        m = re.search(
-            r'<link[^>]+rel=["\']canonical["\'][^>]+href=["\'](https://www\.divan\.ru/product/[^"\']+)["\']',
-            html,
-            flags=re.IGNORECASE,
-        )
-        if m:
-            return m.group(1)
-
-        m = re.search(
-            r'"url"\s*:\s*"(https://www\.divan\.ru/product/[^"]+)"',
-            html,
-            flags=re.IGNORECASE,
-        )
-        if m:
-            return m.group(1)
-
-        m = re.search(
-            r'href=["\'](https://www\.divan\.ru/product/[^"\']+)["\']',
-            html,
-            flags=re.IGNORECASE,
-        )
-        if m:
-            return m.group(1)
-
-        return product_url
-    except Exception as e:
-        print(f"Не удалось резолвить URL {product_url}: {e}")
-        return product_url
-
-
 def fetch_price_from_product_page(browser, product_url: str) -> str:
     page = browser.new_page(
         user_agent=HEADERS["User-Agent"],
@@ -250,6 +177,41 @@ def fetch_price_from_product_page(browser, product_url: str) -> str:
         return "Цена не найдена"
     finally:
         page.close()
+
+
+def scroll_until_all_loaded(page):
+    expected_total = extract_total_products(page)
+    print(f"Ожидаемое количество товаров по странице: {expected_total}")
+
+    prev_unique_count = 0
+    stable_rounds = 0
+    max_rounds = 80
+
+    for round_num in range(1, max_rounds + 1):
+        unique_urls = get_unique_product_urls(page)
+        current_unique_count = len(unique_urls)
+
+        print(f"Скролл {round_num}: найдено уникальных товаров: {current_unique_count}")
+
+        if expected_total and current_unique_count >= expected_total:
+            print("Достигли ожидаемого общего количества товаров.")
+            break
+
+        if current_unique_count == prev_unique_count:
+            stable_rounds += 1
+        else:
+            stable_rounds = 0
+
+        if stable_rounds >= 4:
+            print("Количество уникальных товаров перестало расти, завершаю прокрутку.")
+            break
+
+        prev_unique_count = current_unique_count
+
+        page.mouse.wheel(0, 6000)
+        page.wait_for_timeout(1800)
+        page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+        page.wait_for_timeout(1400)
 
 
 def parse_products_with_browser():
@@ -270,10 +232,10 @@ def parse_products_with_browser():
 
         scroll_until_all_loaded(page)
 
-        links = page.locator('a[href*="/product/"]')
-        count = links.count()
-        print(f"Итоговое число ссылок /product/: {count}")
+        unique_urls_after_scroll = get_unique_product_urls(page)
+        print(f"Итоговое число уникальных товаров: {len(unique_urls_after_scroll)}")
 
+        links = page.locator('a[href*="/product/"]')
         raw_items = links.evaluate_all("""
             (els) => els.map((a) => {
                 const href = a.href || "";
@@ -426,20 +388,18 @@ def main():
 
     if new_products:
         for p in new_products:
-            final_url = resolve_final_product_url(p["url"], p["name"])
-
             if p["image_url"]:
                 send_telegram_photo(
                     photo_url=p["image_url"],
                     name=p["name"],
                     price=p["price"],
-                    product_url=final_url,
+                    product_url=p["url"],
                 )
-                print(f"Отправлено с фото: {p['name']} | {p['price']} | {final_url}")
+                print(f"Отправлено с фото: {p['name']} | {p['price']} | {p['url']}")
             else:
-                text = f"{p['name']}\n{p['price']}\n{final_url}"
+                text = f"{p['name']}\n{p['price']}\n{p['url']}"
                 send_telegram_message(text)
-                print(f"Отправлено без фото: {p['name']} | {p['price']} | {final_url}")
+                print(f"Отправлено без фото: {p['name']} | {p['price']} | {p['url']}")
     else:
         print("Новых подходящих товаров нет.")
 
