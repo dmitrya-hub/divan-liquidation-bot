@@ -79,6 +79,8 @@ def send_telegram_photo(photo_url, name, price, product_url):
 
 
 def normalize_text(text: str) -> str:
+    text = text or ""
+    text = text.replace("\xa0", " ")
     return re.sub(r"\s+", " ", text).strip()
 
 
@@ -161,24 +163,6 @@ def goto_with_retry(page, url, wait_until="domcontentloaded", attempts=3, timeou
             page.wait_for_timeout(10000)
 
 
-def fetch_price_from_product_page(browser, product_url: str) -> str:
-    page = browser.new_page(
-        user_agent=HEADERS["User-Agent"],
-        locale="ru-RU",
-        viewport={"width": 1440, "height": 2200},
-    )
-
-    try:
-        goto_with_retry(page, product_url, wait_until="domcontentloaded", attempts=2, timeout=120000)
-        body_text = page.locator("body").inner_text()
-        return pick_actual_price(body_text)
-    except Exception as e:
-        print(f"Не удалось получить цену со страницы товара {product_url}: {e}")
-        return "Цена не найдена"
-    finally:
-        page.close()
-
-
 def extract_items_from_current_page(page):
     links = page.locator('a[href*="/product/"]')
     page_count = links.count()
@@ -188,12 +172,16 @@ def extract_items_from_current_page(page):
         (els) => els.map((a) => {
             const href = a.href || "";
             const text = (a.innerText || a.textContent || "").trim();
+            const ariaLabel = a.getAttribute("aria-label") || "";
+            const titleAttr = a.getAttribute("title") || "";
 
             let cardText = "";
+            let containerText = "";
             let imageUrl = "";
+            let imageAlt = "";
 
             let el = a;
-            for (let i = 0; i < 14 && el; i++) {
+            for (let i = 0; i < 20 && el; i++) {
                 const t = (el.innerText || el.textContent || "").trim();
 
                 if (!cardText && (
@@ -205,13 +193,23 @@ def extract_items_from_current_page(page):
                     cardText = t;
                 }
 
-                if (!imageUrl) {
+                if (!containerText && t.length > 10) {
+                    containerText = t;
+                }
+
+                if (!imageUrl || !imageAlt) {
                     const img = el.querySelector("img");
                     if (img) {
                         imageUrl =
+                            imageUrl ||
                             img.src ||
                             img.getAttribute("src") ||
                             img.getAttribute("data-src") ||
+                            "";
+                        imageAlt =
+                            imageAlt ||
+                            img.getAttribute("alt") ||
+                            img.getAttribute("title") ||
                             "";
                     }
                 }
@@ -219,18 +217,33 @@ def extract_items_from_current_page(page):
                 el = el.parentElement;
             }
 
-            if (!imageUrl) {
+            if (!imageUrl || !imageAlt) {
                 const img = a.querySelector("img");
                 if (img) {
                     imageUrl =
+                        imageUrl ||
                         img.src ||
                         img.getAttribute("src") ||
                         img.getAttribute("data-src") ||
                         "";
+                    imageAlt =
+                        imageAlt ||
+                        img.getAttribute("alt") ||
+                        img.getAttribute("title") ||
+                        "";
                 }
             }
 
-            return { href, text, cardText, imageUrl };
+            return {
+                href,
+                text,
+                ariaLabel,
+                titleAttr,
+                cardText,
+                containerText,
+                imageUrl,
+                imageAlt
+            };
         })
     """)
 
@@ -352,6 +365,128 @@ def collect_raw_items_with_pagination(browser, base_url: str, raw_items, expecte
     return raw_items
 
 
+def clean_candidate_name(text: str) -> str:
+    text = normalize_text(text)
+
+    if not text:
+        return ""
+
+    text = re.sub(r"^Image:\s*", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"\s+", " ", text).strip()
+
+    bad_fragments = [
+        "купить",
+        "в наличии",
+        "изменить опции",
+        "добавить в корзину",
+    ]
+    low = text.lower()
+
+    if "руб" in low or "₽" in low:
+        return ""
+
+    if any(fragment in low for fragment in bad_fragments) and len(text) < 40:
+        return ""
+
+    if len(text) < 5:
+        return ""
+
+    return text
+
+
+def extract_name_from_item(item):
+    candidates = []
+
+    for key in ["text", "ariaLabel", "titleAttr", "imageAlt", "cardText", "containerText"]:
+        value = clean_candidate_name(item.get(key) or "")
+        if value:
+            candidates.append(value)
+
+    if not candidates:
+        return ""
+
+    preferred = []
+    for c in candidates:
+        low = c.lower()
+        if low.startswith("диван") or low.startswith("кровать"):
+            preferred.append(c)
+
+    if preferred:
+        return max(preferred, key=len)
+
+    return max(candidates, key=len)
+
+
+def fetch_product_details(browser, product_url: str):
+    page = browser.new_page(
+        user_agent=HEADERS["User-Agent"],
+        locale="ru-RU",
+        viewport={"width": 1440, "height": 2200},
+    )
+
+    try:
+        goto_with_retry(page, product_url, wait_until="domcontentloaded", attempts=2, timeout=120000)
+
+        body_text = normalize_text(page.locator("body").inner_text())
+
+        name = ""
+        h1 = page.locator("h1")
+        if h1.count() > 0:
+            try:
+                name = normalize_text(h1.first.inner_text())
+            except Exception:
+                name = ""
+
+        if not name:
+            try:
+                meta_title = page.locator('meta[property="og:title"]').first.get_attribute("content")
+                name = clean_candidate_name(meta_title or "")
+            except Exception:
+                name = ""
+
+        if not name:
+            try:
+                title = normalize_text(page.title())
+                title = re.split(r" купить | в Москве | — ", title, maxsplit=1, flags=re.IGNORECASE)[0]
+                name = clean_candidate_name(title)
+            except Exception:
+                name = ""
+
+        price = pick_actual_price(body_text)
+
+        image_url = ""
+        for selector in [
+            'meta[property="og:image"]',
+            'img[src]',
+        ]:
+            try:
+                if selector.startswith("meta"):
+                    val = page.locator(selector).first.get_attribute("content")
+                else:
+                    val = page.locator(selector).first.get_attribute("src")
+                if val:
+                    image_url = val
+                    break
+            except Exception:
+                pass
+
+        return {
+            "name": name,
+            "price": price,
+            "image_url": image_url,
+        }
+
+    except Exception as e:
+        print(f"Не удалось получить детали со страницы товара {product_url}: {e}")
+        return {
+            "name": "",
+            "price": "Цена не найдена",
+            "image_url": "",
+        }
+    finally:
+        page.close()
+
+
 def parse_products_with_browser():
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -390,67 +525,54 @@ def parse_products_with_browser():
                 )
 
             grouped = defaultdict(lambda: {
-                "texts": set(),
-                "card_texts": [],
-                "image_url": ""
+                "items": [],
+                "image_url": "",
             })
 
             for item in raw_items:
                 href = normalize_text(item.get("href") or "")
-                text = normalize_text(item.get("text") or "")
-                card_text = normalize_text(item.get("cardText") or "")
-                image_url = normalize_text(item.get("imageUrl") or "")
-
                 if not href:
                     continue
 
-                if text:
-                    grouped[href]["texts"].add(text)
+                grouped[href]["items"].append(item)
 
-                if card_text:
-                    grouped[href]["card_texts"].append(card_text)
-
+                image_url = normalize_text(item.get("imageUrl") or "")
                 if image_url and not grouped[href]["image_url"]:
                     grouped[href]["image_url"] = image_url
 
             products = []
 
             for href, data in grouped.items():
-                texts = list(data["texts"])
-                all_card_text = " | ".join(data["card_texts"])
+                item_candidates = data["items"]
                 image_url = data["image_url"]
 
-                candidate_names = [
-                    t for t in texts
-                    if t
-                    and t.lower() != "купить"
-                    and "image" not in t.lower()
-                    and len(t) >= 5
-                ]
+                name = ""
+                price = "Цена не найдена"
 
-                name = max(candidate_names, key=len) if candidate_names else ""
+                for candidate in item_candidates:
+                    candidate_name = extract_name_from_item(candidate)
+                    if candidate_name and len(candidate_name) > len(name):
+                        name = candidate_name
 
-                if not name and all_card_text:
-                    lines = [x.strip() for x in all_card_text.split("|") if x.strip()]
-                    for line in lines:
-                        low = line.lower()
-                        if (
-                            "руб." not in low
-                            and "₽" not in low
-                            and "в наличии" not in low
-                            and "изменить опции" not in low
-                            and "купить" not in low
-                            and len(line) >= 5
-                        ):
-                            name = line
-                            break
+                    candidate_price = pick_actual_price(
+                        normalize_text(candidate.get("cardText") or "") + "\n" +
+                        normalize_text(candidate.get("containerText") or "")
+                    )
+                    if candidate_price != "Цена не найдена":
+                        price = candidate_price
+
+                if not name or price == "Цена не найдена" or not image_url:
+                    details = fetch_product_details(browser, href)
+                    if not name:
+                        name = normalize_text(details.get("name") or "")
+                    if price == "Цена не найдена":
+                        price = details.get("price") or "Цена не найдена"
+                    if not image_url:
+                        image_url = normalize_text(details.get("image_url") or "")
 
                 if not name:
+                    print(f"Пропускаю товар без имени: {href}")
                     continue
-
-                price = pick_actual_price(all_card_text)
-                if price == "Цена не найдена":
-                    price = fetch_price_from_product_page(browser, href)
 
                 products.append({
                     "url": href,
