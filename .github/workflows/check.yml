@@ -9,7 +9,7 @@ permissions:
 
 concurrency:
   group: divan-liquidation-bot-main
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   check:
