@@ -1,19 +1,21 @@
-name: Check Divan liquidation
-run-name: "Divan check • ${{ github.event_name }} • ${{ github.ref_name }}"
+name: check
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "*/5 * * * *"
 
 permissions:
   contents: write
 
 concurrency:
-  group: divan-liquidation-bot-main
+  group: divan-liquidation-bot
   cancel-in-progress: false
 
 jobs:
   check:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Checkout repository
@@ -46,27 +48,28 @@ jobs:
       - name: Merge local and remote state
         run: |
           git fetch origin main
-          git show origin/main:state.json > remote_state.json || echo '{"seen":[]}' > remote_state.json
+
+          if git show origin/main:state.json > remote_state.json 2>/dev/null; then
+            echo "remote_state.json loaded"
+          else
+            echo '{"seen":[]}' > remote_state.json
+          fi
+
           cp state.json local_state.json
 
           python - <<'PY'
           import json
           from pathlib import Path
 
-          def load_json(path_str):
-              path = Path(path_str)
-              if not path.exists():
-                  return {"seen": []}
+          def load_seen(path):
               try:
-                  return json.loads(path.read_text(encoding="utf-8"))
+                  data = json.loads(Path(path).read_text(encoding="utf-8"))
+                  return set(data.get("seen", []))
               except Exception:
-                  return {"seen": []}
+                  return set()
 
-          local_data = load_json("local_state.json")
-          remote_data = load_json("remote_state.json")
-
-          local_seen = set(local_data.get("seen", []))
-          remote_seen = set(remote_data.get("seen", []))
+          local_seen = load_seen("local_state.json")
+          remote_seen = load_seen("remote_state.json")
 
           merged_seen = sorted(local_seen | remote_seen)
 
@@ -93,4 +96,58 @@ jobs:
           fi
 
           git commit -m "Update state.json"
-          git push origin HEAD:main
+
+          for i in 1 2 3; do
+            echo "Push attempt $i"
+
+            if git push origin HEAD:main; then
+              echo "Push successful"
+              exit 0
+            fi
+
+            echo "Push failed, rebasing and retrying..."
+
+            git fetch origin main
+            git rebase origin/main || {
+              echo "Rebase failed, resolving state.json by merging again"
+
+              git rebase --abort || true
+
+              git show origin/main:state.json > remote_state.json 2>/dev/null || echo '{"seen":[]}' > remote_state.json
+              cp state.json local_state.json
+
+              python - <<'PY'
+          import json
+          from pathlib import Path
+
+          def load_seen(path):
+              try:
+                  data = json.loads(Path(path).read_text(encoding="utf-8"))
+                  return set(data.get("seen", []))
+              except Exception:
+                  return set()
+
+          local_seen = load_seen("local_state.json")
+          remote_seen = load_seen("remote_state.json")
+
+          merged_seen = sorted(local_seen | remote_seen)
+
+          Path("state.json").write_text(
+              json.dumps({"seen": merged_seen}, ensure_ascii=False, indent=2),
+              encoding="utf-8"
+          )
+
+          print(f"Local seen: {len(local_seen)}")
+          print(f"Remote seen: {len(remote_seen)}")
+          print(f"Merged seen: {len(merged_seen)}")
+          PY
+
+              git add state.json
+              git commit -m "Update state.json" || true
+            }
+
+            sleep 3
+          done
+
+          echo "Не удалось запушить state.json после 3 попыток"
+          exit 1
