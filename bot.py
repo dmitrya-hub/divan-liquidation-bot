@@ -15,13 +15,6 @@ STATE_FILE = Path("state.json")
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
 
-ALLOWED_TYPES = {
-    "Диван прямой",
-    "Диван угловой",
-    "Диван модульный",
-    "Кровать",
-}
-
 HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -87,21 +80,6 @@ def send_telegram_photo(photo_url, name, price, product_url):
 
 def normalize_text(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
-
-
-def detect_product_type(name: str):
-    low = name.lower().strip()
-
-    if low.startswith("диван прямой"):
-        return "Диван прямой"
-    if low.startswith("диван угловой"):
-        return "Диван угловой"
-    if low.startswith("диван модульный"):
-        return "Диван модульный"
-    if low.startswith("кровать"):
-        return "Кровать"
-
-    return None
 
 
 def extract_total_products(page):
@@ -259,7 +237,11 @@ def extract_items_from_current_page(page):
 
 def merge_unique_items(raw_items, new_items):
     added = 0
-    existing_urls = {normalize_text(item.get("href") or "") for item in raw_items if normalize_text(item.get("href") or "")}
+    existing_urls = {
+        normalize_text(item.get("href") or "")
+        for item in raw_items
+        if normalize_text(item.get("href") or "")
+    }
 
     for item in new_items:
         href = normalize_text(item.get("href") or "")
@@ -389,7 +371,6 @@ def parse_products_with_browser():
             if "Москва" not in body_text:
                 print("Внимание: страница не выглядит как московская версия")
 
-            # 1. Основной режим: скролл
             raw_items = collect_raw_items_with_scroll(page, expected_total=expected_total)
 
             collected_count = len({
@@ -399,7 +380,6 @@ def parse_products_with_browser():
             })
             print(f"После скролла собрано уникальных товаров: {collected_count}")
 
-            # 2. Fallback: пагинация, если скролл не добрал всё
             if not expected_total or collected_count < expected_total:
                 print("Скролл не добрал все товары, включаю обход страниц.")
                 raw_items = collect_raw_items_with_pagination(
@@ -468,10 +448,6 @@ def parse_products_with_browser():
                 if not name:
                     continue
 
-                product_type = detect_product_type(name)
-                if product_type not in ALLOWED_TYPES:
-                    continue
-
                 price = pick_actual_price(all_card_text)
                 if price == "Цена не найдена":
                     price = fetch_price_from_product_page(browser, href)
@@ -479,7 +455,7 @@ def parse_products_with_browser():
                 products.append({
                     "url": href,
                     "name": name,
-                    "type": product_type,
+                    "type": "Из URL-фильтра",
                     "price": price,
                     "image_url": image_url,
                 })
