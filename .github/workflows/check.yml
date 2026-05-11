@@ -17,6 +17,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -45,16 +48,8 @@ jobs:
           CHAT_ID: ${{ secrets.CHAT_ID }}
         run: python bot.py
 
-      - name: Merge local and remote state
+      - name: Prepare state snapshot
         run: |
-          git fetch origin main
-
-          if git show origin/main:state.json > remote_state.json 2>/dev/null; then
-            echo "remote_state.json loaded"
-          else
-            echo '{"seen":[]}' > remote_state.json
-          fi
-
           cp state.json local_state.json
 
           python - <<'PY'
@@ -69,18 +64,20 @@ jobs:
                   return set()
 
           local_seen = load_seen("local_state.json")
-          remote_seen = load_seen("remote_state.json")
 
-          merged_seen = sorted(local_seen | remote_seen)
+          # Snapshot-логика:
+          # сохраняем только товары, которые бот увидел в текущем успешном запуске.
+          # Если товар исчезнет из выдачи, он удалится из state.json.
+          # Если потом появится снова с тем же URL, бот снова пришлёт уведомление.
+          saved_seen = sorted(local_seen)
 
           Path("state.json").write_text(
-              json.dumps({"seen": merged_seen}, ensure_ascii=False, indent=2),
+              json.dumps({"seen": saved_seen}, ensure_ascii=False, indent=2),
               encoding="utf-8"
           )
 
           print(f"Local seen: {len(local_seen)}")
-          print(f"Remote seen: {len(remote_seen)}")
-          print(f"Merged seen: {len(merged_seen)}")
+          print(f"Saved seen snapshot: {len(saved_seen)}")
           PY
 
       - name: Commit updated state
@@ -108,43 +105,17 @@ jobs:
             echo "Push failed, rebasing and retrying..."
 
             git fetch origin main
-            git rebase origin/main || {
-              echo "Rebase failed, resolving state.json by merging again"
+
+            if git rebase origin/main; then
+              echo "Rebase successful"
+            else
+              echo "Rebase failed, keeping local state snapshot"
 
               git rebase --abort || true
 
-              git show origin/main:state.json > remote_state.json 2>/dev/null || echo '{"seen":[]}' > remote_state.json
-              cp state.json local_state.json
-
-              python - <<'PY'
-          import json
-          from pathlib import Path
-
-          def load_seen(path):
-              try:
-                  data = json.loads(Path(path).read_text(encoding="utf-8"))
-                  return set(data.get("seen", []))
-              except Exception:
-                  return set()
-
-          local_seen = load_seen("local_state.json")
-          remote_seen = load_seen("remote_state.json")
-
-          merged_seen = sorted(local_seen | remote_seen)
-
-          Path("state.json").write_text(
-              json.dumps({"seen": merged_seen}, ensure_ascii=False, indent=2),
-              encoding="utf-8"
-          )
-
-          print(f"Local seen: {len(local_seen)}")
-          print(f"Remote seen: {len(remote_seen)}")
-          print(f"Merged seen: {len(merged_seen)}")
-          PY
-
               git add state.json
               git commit -m "Update state.json" || true
-            }
+            fi
 
             sleep 3
           done
