@@ -6,14 +6,9 @@ from collections import defaultdict
 from pathlib import Path
 from urllib.parse import urlencode, urlparse, parse_qs, urlunparse
 
-import requests
 from playwright.sync_api import sync_playwright
 
 URL = "https://www.divan.ru/category/rasprodaza-mebeli?types%5B%5D=54&types%5B%5D=1&types%5B%5D=4&types%5B%5D=43&defect=1"
-STATE_FILE = Path("state.json")
-
-BOT_TOKEN = os.getenv("BOT_TOKEN")
-CHAT_ID = os.getenv("CHAT_ID")
 
 HEADERS = {
     "User-Agent": (
@@ -22,60 +17,6 @@ HEADERS = {
         "Chrome/122.0.0.0 Safari/537.36"
     )
 }
-
-
-def load_state():
-    if STATE_FILE.exists():
-        with open(STATE_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return {"seen": []}
-
-
-def save_state(state):
-    with open(STATE_FILE, "w", encoding="utf-8") as f:
-        json.dump(state, f, ensure_ascii=False, indent=2)
-
-
-def send_telegram_message(text):
-    if not BOT_TOKEN or not CHAT_ID:
-        raise RuntimeError("Не заданы BOT_TOKEN или CHAT_ID")
-
-    api_url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    resp = requests.post(
-        api_url,
-        data={
-            "chat_id": CHAT_ID,
-            "text": text,
-            "disable_web_page_preview": False,
-        },
-        timeout=30,
-    )
-    resp.raise_for_status()
-
-
-def send_telegram_photo(photo_url, name, price, product_url):
-    if not BOT_TOKEN or not CHAT_ID:
-        raise RuntimeError("Не заданы BOT_TOKEN или CHAT_ID")
-
-    caption = f"{name}\n{price}\n{product_url}"
-
-    api_url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendPhoto"
-    resp = requests.post(
-        api_url,
-        data={
-            "chat_id": CHAT_ID,
-            "photo": photo_url,
-            "caption": caption[:1024],
-        },
-        timeout=30,
-    )
-
-    if resp.status_code != 200:
-        print(f"Не удалось отправить фото, отправляю текстом: {resp.text}")
-        send_telegram_message(caption)
-        return
-
-    resp.raise_for_status()
 
 
 def normalize_text(text: str) -> str:
@@ -146,21 +87,24 @@ def pick_actual_price(text: str):
     prices = extract_price_candidates(text)
     if not prices:
         return "Цена не найдена"
+
+    # На карточке часто есть старая и новая цена.
+    # Актуальная цена обычно меньше старой.
     return format_price(min(prices))
 
 
-def goto_with_retry(page, url, wait_until="domcontentloaded", attempts=3, timeout=120000):
+def goto_with_retry(page, url, wait_until="domcontentloaded", attempts=2, timeout=60000):
     for attempt in range(1, attempts + 1):
         try:
             print(f"Открываю {url}, попытка {attempt}...")
             page.goto(url, wait_until=wait_until, timeout=timeout)
-            page.wait_for_timeout(5000)
-            return
+            page.wait_for_timeout(3000)
+            return True
         except Exception as e:
             print(f"Ошибка открытия {url} на попытке {attempt}: {e}")
             if attempt == attempts:
-                raise
-            page.wait_for_timeout(10000)
+                return False
+            page.wait_for_timeout(5000)
 
 
 def extract_items_from_current_page(page):
@@ -273,11 +217,12 @@ def collect_raw_items_with_scroll(page, expected_total=None):
     raw_items = []
     prev_unique_count = 0
     stable_rounds = 0
-    max_rounds = 40
+    max_rounds = 25
 
     for round_num in range(1, max_rounds + 1):
         page_items = extract_items_from_current_page(page)
         added = merge_unique_items(raw_items, page_items)
+
         current_unique_count = len({
             normalize_text(item.get("href") or "")
             for item in raw_items
@@ -305,9 +250,9 @@ def collect_raw_items_with_scroll(page, expected_total=None):
         prev_unique_count = current_unique_count
 
         page.mouse.wheel(0, 6000)
-        page.wait_for_timeout(1800)
+        page.wait_for_timeout(1200)
         page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-        page.wait_for_timeout(1400)
+        page.wait_for_timeout(1200)
 
     return raw_items
 
@@ -326,18 +271,18 @@ def collect_raw_items_with_pagination(browser, base_url: str, raw_items, expecte
             if normalize_text(item.get("href") or "")
         })
 
-        for page_num in range(2, 51):
+        for page_num in range(2, 15):
             page_url = build_page_url(base_url, page_num)
             print(f"Обхожу страницу пагинации {page_num}: {page_url}")
 
-            try:
-                goto_with_retry(page, page_url, wait_until="domcontentloaded", attempts=2, timeout=120000)
-            except Exception as e:
-                print(f"Не удалось открыть page={page_num}: {e}")
+            ok = goto_with_retry(page, page_url, wait_until="domcontentloaded", attempts=2, timeout=60000)
+            if not ok:
+                print(f"Не удалось открыть page={page_num}, завершаю пагинацию.")
                 break
 
             page_items = extract_items_from_current_page(page)
             added = merge_unique_items(raw_items, page_items)
+
             current_unique_count = len({
                 normalize_text(item.get("href") or "")
                 for item in raw_items
@@ -367,25 +312,26 @@ def collect_raw_items_with_pagination(browser, base_url: str, raw_items, expecte
 
 def clean_candidate_name(text: str) -> str:
     text = normalize_text(text)
-
     if not text:
         return ""
 
     text = re.sub(r"^Image:\s*", "", text, flags=re.IGNORECASE)
-    text = re.sub(r"\s+", " ", text).strip()
+    text = normalize_text(text)
 
-    bad_fragments = [
-        "купить",
-        "в наличии",
-        "изменить опции",
-        "добавить в корзину",
-    ]
     low = text.lower()
 
     if "руб" in low or "₽" in low:
         return ""
 
-    if any(fragment in low for fragment in bad_fragments) and len(text) < 40:
+    bad_exact = {
+        "купить",
+        "в корзину",
+        "изменить опции",
+    }
+    if low in bad_exact:
+        return ""
+
+    if "в наличии" in low:
         return ""
 
     if len(text) < 5:
@@ -397,10 +343,18 @@ def clean_candidate_name(text: str) -> str:
 def extract_name_from_item(item):
     candidates = []
 
-    for key in ["text", "ariaLabel", "titleAttr", "imageAlt", "cardText", "containerText"]:
+    for key in ["text", "ariaLabel", "titleAttr", "imageAlt"]:
         value = clean_candidate_name(item.get(key) or "")
         if value:
             candidates.append(value)
+
+    # cardText/containerText могут быть длинными, поэтому разбиваем на строки
+    for key in ["cardText", "containerText"]:
+        raw = item.get(key) or ""
+        for part in re.split(r"[\n|]", raw):
+            value = clean_candidate_name(part)
+            if value:
+                candidates.append(value)
 
     if not candidates:
         return ""
@@ -417,79 +371,58 @@ def extract_name_from_item(item):
     return max(candidates, key=len)
 
 
-def fetch_product_details(browser, product_url: str):
-    page = browser.new_page(
-        user_agent=HEADERS["User-Agent"],
-        locale="ru-RU",
-        viewport={"width": 1440, "height": 2200},
-    )
+def build_catalog_products(raw_items):
+    grouped = defaultdict(lambda: {
+        "items": [],
+        "image_url": "",
+    })
 
-    try:
-        goto_with_retry(page, product_url, wait_until="domcontentloaded", attempts=2, timeout=120000)
+    for item in raw_items:
+        href = normalize_text(item.get("href") or "")
+        if not href:
+            continue
 
-        body_text = normalize_text(page.locator("body").inner_text())
+        grouped[href]["items"].append(item)
+
+        image_url = normalize_text(item.get("imageUrl") or "")
+        if image_url and not grouped[href]["image_url"]:
+            grouped[href]["image_url"] = image_url
+
+    products = []
+
+    for href, data in grouped.items():
+        item_candidates = data["items"]
+        image_url = data["image_url"]
 
         name = ""
-        h1 = page.locator("h1")
-        if h1.count() > 0:
-            try:
-                name = normalize_text(h1.first.inner_text())
-            except Exception:
-                name = ""
+        price = "Цена не найдена"
 
-        if not name:
-            try:
-                meta_title = page.locator('meta[property="og:title"]').first.get_attribute("content")
-                name = clean_candidate_name(meta_title or "")
-            except Exception:
-                name = ""
+        for candidate in item_candidates:
+            candidate_name = extract_name_from_item(candidate)
+            if candidate_name and len(candidate_name) > len(name):
+                name = candidate_name
 
-        if not name:
-            try:
-                title = normalize_text(page.title())
-                title = re.split(r" купить | в Москве | — ", title, maxsplit=1, flags=re.IGNORECASE)[0]
-                name = clean_candidate_name(title)
-            except Exception:
-                name = ""
+            candidate_price = pick_actual_price(
+                normalize_text(candidate.get("cardText") or "") + "\n" +
+                normalize_text(candidate.get("containerText") or "")
+            )
+            if candidate_price != "Цена не найдена":
+                price = candidate_price
 
-        price = pick_actual_price(body_text)
-
-        image_url = ""
-        for selector in [
-            'meta[property="og:image"]',
-            'img[src]',
-        ]:
-            try:
-                if selector.startswith("meta"):
-                    val = page.locator(selector).first.get_attribute("content")
-                else:
-                    val = page.locator(selector).first.get_attribute("src")
-                if val:
-                    image_url = val
-                    break
-            except Exception:
-                pass
-
-        return {
+        products.append({
+            "url": href,
             "name": name,
             "price": price,
             "image_url": image_url,
-        }
+        })
 
-    except Exception as e:
-        print(f"Не удалось получить детали со страницы товара {product_url}: {e}")
-        return {
-            "name": "",
-            "price": "Цена не найдена",
-            "image_url": "",
-        }
-    finally:
-        page.close()
+    return products
 
 
-def parse_products_with_browser():
+def main():
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
+
         page = browser.new_page(
             user_agent=HEADERS["User-Agent"],
             locale="ru-RU",
@@ -497,7 +430,10 @@ def parse_products_with_browser():
         )
 
         try:
-            goto_with_retry(page, URL, wait_until="domcontentloaded", attempts=3, timeout=120000)
+            ok = goto_with_retry(page, URL, wait_until="domcontentloaded", attempts=2, timeout=60000)
+            if not ok:
+                print("Не удалось открыть основную страницу.")
+                return 1
 
             body_text = page.locator("body").inner_text()
             expected_total = extract_total_products(page)
@@ -524,110 +460,54 @@ def parse_products_with_browser():
                     expected_total=expected_total,
                 )
 
-            grouped = defaultdict(lambda: {
-                "items": [],
-                "image_url": "",
-            })
+            products = build_catalog_products(raw_items)
 
-            for item in raw_items:
-                href = normalize_text(item.get("href") or "")
-                if not href:
-                    continue
+            print("")
+            print("========== ИТОГ ==========")
+            print(f"Собрано raw items: {len(raw_items)}")
+            print(f"Собрано товаров: {len(products)}")
 
-                grouped[href]["items"].append(item)
+            without_name = [p for p in products if not p["name"]]
+            without_price = [p for p in products if p["price"] == "Цена не найдена"]
+            without_image = [p for p in products if not p["image_url"]]
 
-                image_url = normalize_text(item.get("imageUrl") or "")
-                if image_url and not grouped[href]["image_url"]:
-                    grouped[href]["image_url"] = image_url
+            print(f"Без имени: {len(without_name)}")
+            print(f"Без цены: {len(without_price)}")
+            print(f"Без картинки: {len(without_image)}")
 
-            products = []
+            print("")
+            print("========== ПЕРВЫЕ 20 ТОВАРОВ ==========")
 
-            for href, data in grouped.items():
-                item_candidates = data["items"]
-                image_url = data["image_url"]
+            for idx, p_item in enumerate(products[:20], start=1):
+                print("")
+                print(f"{idx}. {p_item['name'] or 'ИМЯ НЕ НАЙДЕНО'}")
+                print(f"Цена: {p_item['price']}")
+                print(f"Картинка: {p_item['image_url'] or 'КАРТИНКА НЕ НАЙДЕНА'}")
+                print(f"Ссылка: {p_item['url']}")
 
-                name = ""
-                price = "Цена не найдена"
+            if without_name:
+                print("")
+                print("========== ПЕРВЫЕ 10 БЕЗ ИМЕНИ ==========")
+                for idx, p_item in enumerate(without_name[:10], start=1):
+                    print(f"{idx}. {p_item['url']}")
 
-                for candidate in item_candidates:
-                    candidate_name = extract_name_from_item(candidate)
-                    if candidate_name and len(candidate_name) > len(name):
-                        name = candidate_name
+            if without_price:
+                print("")
+                print("========== ПЕРВЫЕ 10 БЕЗ ЦЕНЫ ==========")
+                for idx, p_item in enumerate(without_price[:10], start=1):
+                    print(f"{idx}. {p_item['name'] or 'ИМЯ НЕ НАЙДЕНО'} | {p_item['url']}")
 
-                    candidate_price = pick_actual_price(
-                        normalize_text(candidate.get("cardText") or "") + "\n" +
-                        normalize_text(candidate.get("containerText") or "")
-                    )
-                    if candidate_price != "Цена не найдена":
-                        price = candidate_price
+            if without_image:
+                print("")
+                print("========== ПЕРВЫЕ 10 БЕЗ КАРТИНКИ ==========")
+                for idx, p_item in enumerate(without_image[:10], start=1):
+                    print(f"{idx}. {p_item['name'] or 'ИМЯ НЕ НАЙДЕНО'} | {p_item['url']}")
 
-                if not name or price == "Цена не найдена" or not image_url:
-                    details = fetch_product_details(browser, href)
-                    if not name:
-                        name = normalize_text(details.get("name") or "")
-                    if price == "Цена не найдена":
-                        price = details.get("price") or "Цена не найдена"
-                    if not image_url:
-                        image_url = normalize_text(details.get("image_url") or "")
-
-                if not name:
-                    print(f"Пропускаю товар без имени: {href}")
-                    continue
-
-                products.append({
-                    "url": href,
-                    "name": name,
-                    "type": "Из URL-фильтра",
-                    "price": price,
-                    "image_url": image_url,
-                })
-
-            return products
+            return 0
 
         finally:
             page.close()
             browser.close()
-
-
-def main():
-    products = parse_products_with_browser()
-
-    type_stats = {}
-    for p in products:
-        type_stats[p["type"]] = type_stats.get(p["type"], 0) + 1
-
-    print(f"Найдено товаров после фильтрации: {len(products)}")
-    print(f"По типам: {type_stats}")
-
-    if not products:
-        print("Подходящие товары не найдены")
-        return 0
-
-    state = load_state()
-    seen = set(state.get("seen", []))
-
-    current_urls = {p["url"] for p in products}
-    new_products = [p for p in products if p["url"] not in seen]
-
-    if new_products:
-        for p in new_products:
-            if p["image_url"]:
-                send_telegram_photo(
-                    photo_url=p["image_url"],
-                    name=p["name"],
-                    price=p["price"],
-                    product_url=p["url"],
-                )
-                print(f"Отправлено с фото: {p['name']} | {p['price']} | {p['url']}")
-            else:
-                text = f"{p['name']}\n{p['price']}\n{p['url']}"
-                send_telegram_message(text)
-                print(f"Отправлено без фото: {p['name']} | {p['price']} | {p['url']}")
-    else:
-        print("Новых подходящих товаров нет.")
-
-    save_state({"seen": sorted(current_urls)})
-    return 0
 
 
 if __name__ == "__main__":
