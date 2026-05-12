@@ -135,11 +135,22 @@ def extract_price_candidates(text: str):
     if not text:
         return []
 
-    matches = re.findall(
-        r"(\d[\d\s]*\s?(?:руб\.?|₽))",
-        text,
-        flags=re.IGNORECASE,
-    )
+    text = text.replace("\xa0", " ")
+
+    # Важно:
+    # Не используем \d[\d\s]*, потому что он склеивает процент скидки с ценой:
+    # "45 92 990 руб." -> "4592990"
+    #
+    # Этот паттерн ищет нормальные цены:
+    # 92 990 руб.
+    # 171 970 руб.
+    # 999 руб.
+    # 12990 руб.
+    #
+    # И не захватывает число скидки перед ценой.
+    pattern = r"(?<!\d)(\d{1,3}(?:[ \t]\d{3})+|\d{1,6})\s*(?:руб\.?|₽)"
+
+    matches = re.findall(pattern, text, flags=re.IGNORECASE)
 
     prices = []
 
@@ -154,7 +165,8 @@ def extract_price_candidates(text: str):
         except ValueError:
             continue
 
-        if value > 0:
+        # Отсекаем маленькие числа, чтобы случайно не принять скидку 45 за цену.
+        if value >= 500:
             prices.append(value)
 
     return prices
@@ -430,7 +442,21 @@ def collect_all_products():
         before = len(all_by_url)
 
         for product in products:
-            all_by_url[product["url"]] = product
+            if product["url"] not in all_by_url:
+                all_by_url[product["url"]] = product
+            else:
+                existing = all_by_url[product["url"]]
+
+                if len(product.get("name", "")) > len(existing.get("name", "")):
+                    existing["name"] = product["name"]
+
+                existing["price"] = choose_better_price(
+                    existing.get("price"),
+                    product.get("price"),
+                )
+
+                if not existing.get("image_url") and product.get("image_url"):
+                    existing["image_url"] = product["image_url"]
 
         after = len(all_by_url)
         added = after - before
