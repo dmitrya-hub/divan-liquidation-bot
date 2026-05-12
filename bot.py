@@ -28,6 +28,10 @@ MAX_PAGES = 10
 REQUEST_TIMEOUT = 45
 MIN_PRODUCTS_TO_SAVE_STATE = 50
 
+TELEGRAM_TIMEOUT = 60
+TELEGRAM_ATTEMPTS = 3
+TELEGRAM_PAUSE_SECONDS = 1.2
+
 HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -131,66 +135,11 @@ def extract_total_products(html: str):
     return None
 
 
-def extract_price_candidates(text: str):
-    if not text:
-        return []
-
-    text = text.replace("\xa0", " ")
-
-    # Важно:
-    # Не используем \d[\d\s]*, потому что он склеивает процент скидки с ценой:
-    # "45 92 990 руб." -> "4592990"
-    #
-    # Этот паттерн ищет нормальные цены:
-    # 92 990 руб.
-    # 171 970 руб.
-    # 999 руб.
-    # 12990 руб.
-    #
-    # И не захватывает число скидки перед ценой.
-    pattern = r"(?<!\d)(\d{1,3}(?:[ \t]\d{3})+|\d{1,6})\s*(?:руб\.?|₽)"
-
-    matches = re.findall(pattern, text, flags=re.IGNORECASE)
-
-    prices = []
-
-    for raw in matches:
-        digits = re.sub(r"[^\d]", "", raw)
-
-        if not digits:
-            continue
-
-        try:
-            value = int(digits)
-        except ValueError:
-            continue
-
-        # Отсекаем маленькие числа, чтобы случайно не принять скидку 45 за цену.
-        if value >= 500:
-            prices.append(value)
-
-    return prices
-
-
 def format_price(value):
     if value is None:
         return "Цена не найдена"
 
     return f"{value:,}".replace(",", " ") + " руб."
-
-
-def pick_actual_price(text: str):
-    prices = extract_price_candidates(text)
-
-    if not prices:
-        return "Цена не найдена"
-
-    # В карточке распродажи обычно есть две цены:
-    # 1. скидочная / актуальная
-    # 2. старая цена
-    #
-    # Скидочная цена меньше старой, поэтому берём минимальную.
-    return format_price(min(prices))
 
 
 def price_to_int(price: str):
@@ -208,21 +157,34 @@ def price_to_int(price: str):
         return None
 
 
-def choose_better_price(old_price: str, new_price: str) -> str:
-    old_value = price_to_int(old_price)
-    new_value = price_to_int(new_price)
+def is_price_line(text: str) -> bool:
+    text = normalize_text(text)
+    return bool(re.fullmatch(r"\d{1,3}(?:\s\d{3})*\s*(?:руб\.?|₽)", text, flags=re.IGNORECASE))
 
-    if old_value is None and new_value is None:
-        return "Цена не найдена"
 
-    if old_value is None:
-        return new_price
+def parse_price_line(text: str):
+    if not is_price_line(text):
+        return None
 
-    if new_value is None:
-        return old_price
+    digits = re.sub(r"[^\d]", "", text)
 
-    # Для распродажи актуальная / скидочная цена обычно меньше старой.
-    return new_price if new_value < old_value else old_price
+    if not digits:
+        return None
+
+    try:
+        value = int(digits)
+    except ValueError:
+        return None
+
+    if value < 500:
+        return None
+
+    return value
+
+
+def is_discount_line(text: str) -> bool:
+    text = normalize_text(text)
+    return bool(re.fullmatch(r"\d{1,2}", text))
 
 
 def clean_product_name(text: str) -> str:
@@ -257,7 +219,7 @@ def clean_product_name(text: str) -> str:
 
 
 def is_product_name(text: str) -> bool:
-    low = text.lower()
+    low = normalize_text(text).lower()
 
     return (
         low.startswith("диван")
@@ -266,159 +228,215 @@ def is_product_name(text: str) -> bool:
     )
 
 
-def find_card_container(a):
+def extract_image_links(soup: BeautifulSoup):
     """
-    Идём вверх от ссылки товара и ищем ближайший контейнер,
-    где есть цена, ссылка на товар и картинка.
+    Возвращает список ссылок-картинок товаров в порядке их появления.
+    В HTML divan.ru изображение товара обычно идёт как ссылка:
+    <a href="/product/..."><img alt="Диван ..."></a>
     """
-    current = a
+    result = []
 
-    for _ in range(10):
-        if current is None:
-            break
+    for a in soup.select('a[href*="/product/"]'):
+        img = a.select_one("img")
+        if not img:
+            continue
 
-        text = normalize_text(current.get_text(" ", strip=True))
+        href = a.get("href")
+        if not href:
+            continue
 
-        has_price = bool(extract_price_candidates(text))
-        has_product_link = bool(current.select_one('a[href*="/product/"]'))
-        has_image = bool(current.select_one("img"))
+        product_url = urljoin(BASE_URL, href)
 
-        if has_price and has_product_link and has_image:
-            return current
+        name = clean_product_name(img.get("alt", "") or img.get("title", ""))
 
-        current = current.parent
+        image_url = ""
+        for attr in ["src", "data-src", "data-original", "data-lazy"]:
+            value = img.get(attr)
+            if value:
+                image_url = urljoin(BASE_URL, value)
+                break
 
-    return a.parent or a
+        if not image_url:
+            srcset = img.get("srcset") or img.get("data-srcset")
+            if srcset:
+                first = srcset.split(",")[0].strip().split(" ")[0]
+                if first:
+                    image_url = urljoin(BASE_URL, first)
 
+        result.append(
+            {
+                "url": product_url,
+                "name": name,
+                "image_url": image_url,
+            }
+        )
 
-def extract_image_from_card(card):
-    img = card.select_one("img")
-
-    if not img:
-        return ""
-
-    for attr in ["src", "data-src", "data-original", "data-lazy"]:
-        value = img.get(attr)
-
-        if value:
-            return urljoin(BASE_URL, value)
-
-    srcset = img.get("srcset") or img.get("data-srcset")
-
-    if srcset:
-        first = srcset.split(",")[0].strip().split(" ")[0]
-
-        if first:
-            return urljoin(BASE_URL, first)
-
-    return ""
+    return result
 
 
-def extract_name_from_card(card, product_url):
-    candidates = []
+def extract_title_links(soup: BeautifulSoup):
+    """
+    Возвращает ссылки-названия товаров в порядке их появления.
+    """
+    result = []
 
-    # 1. Текст ссылок на этот же товар
-    for a in card.select('a[href*="/product/"]'):
-        href = urljoin(BASE_URL, a.get("href", ""))
+    for a in soup.select('a[href*="/product/"]'):
+        href = a.get("href")
+        if not href:
+            continue
+
+        product_url = urljoin(BASE_URL, href)
         text = clean_product_name(a.get_text(" ", strip=True))
 
-        if href == product_url and text:
-            candidates.append(text)
+        if not text:
+            continue
 
-        for attr in ["title", "aria-label"]:
-            attr_value = clean_product_name(a.get(attr, ""))
+        if not is_product_name(text):
+            continue
 
-            if href == product_url and attr_value:
-                candidates.append(attr_value)
+        result.append(
+            {
+                "url": product_url,
+                "name": text,
+            }
+        )
 
-    # 2. Alt / title картинки
-    for img in card.select("img"):
-        alt = clean_product_name(img.get("alt", ""))
+    return result
 
-        if alt:
-            candidates.append(alt)
 
-        title = clean_product_name(img.get("title", ""))
+def extract_price_blocks_from_text(soup: BeautifulSoup):
+    """
+    В HTML каталог отдаёт карточки последовательно:
+    Image: Название
+    скидка
+    скидочная цена
+    старая цена
+    ...
+    Купить
+    Название
 
-        if title:
-            candidates.append(title)
+    Берём первый нормальный price после Image как актуальную цену.
+    """
+    lines = [
+        normalize_text(line)
+        for line in soup.get_text("\n", strip=True).split("\n")
+        if normalize_text(line)
+    ]
 
-    # 3. Короткие строки из карточки
-    raw_lines = card.get_text("\n", strip=True).split("\n")
+    blocks = []
 
-    for line in raw_lines:
-        line = clean_product_name(line)
+    i = 0
+    while i < len(lines):
+        line = lines[i]
 
-        if line:
-            candidates.append(line)
+        if not line.lower().startswith("image:"):
+            i += 1
+            continue
 
-    product_like = [c for c in candidates if is_product_name(c)]
+        name = clean_product_name(line)
+        prices = []
 
-    if product_like:
-        return max(product_like, key=len)
+        j = i + 1
+        while j < len(lines):
+            current = lines[j]
 
-    if candidates:
-        return max(candidates, key=len)
+            if current.lower().startswith("image:"):
+                break
 
-    # 4. Fallback из URL
+            if current.lower() == "купить":
+                break
+
+            value = parse_price_line(current)
+            if value is not None:
+                prices.append(value)
+
+            j += 1
+
+        if prices:
+            blocks.append(
+                {
+                    "image_name": name,
+                    "price": format_price(prices[0]),
+                    "min_price": format_price(min(prices)),
+                }
+            )
+
+        i += 1
+
+    return blocks
+
+
+def fallback_name_from_url(product_url: str) -> str:
     slug = product_url.rstrip("/").split("/")[-1]
     slug = re.sub(r"-art--.*$", "", slug)
     slug = slug.replace("-", " ")
-
     return normalize_text(slug).title()
 
 
 def extract_products_from_html(html: str):
     soup = BeautifulSoup(html, "html.parser")
 
-    result_by_url = {}
+    image_links = extract_image_links(soup)
+    title_links = extract_title_links(soup)
+    price_blocks = extract_price_blocks_from_text(soup)
 
-    all_links = soup.select('a[href*="/product/"]')
-    print(f"Найдено ссылок /product/ в HTML: {len(all_links)}", flush=True)
+    print(f"Найдено image-ссылок товаров: {len(image_links)}", flush=True)
+    print(f"Найдено title-ссылок товаров: {len(title_links)}", flush=True)
+    print(f"Найдено price-блоков товаров: {len(price_blocks)}", flush=True)
 
-    for a in all_links:
-        href = a.get("href")
+    products = []
 
-        if not href:
+    count = max(len(image_links), len(title_links), len(price_blocks))
+
+    for idx in range(count):
+        image_item = image_links[idx] if idx < len(image_links) else {}
+        title_item = title_links[idx] if idx < len(title_links) else {}
+        price_item = price_blocks[idx] if idx < len(price_blocks) else {}
+
+        product_url = title_item.get("url") or image_item.get("url")
+        if not product_url:
             continue
 
-        product_url = urljoin(BASE_URL, href)
+        image_url = image_item.get("image_url", "")
 
-        if "/product/" not in product_url:
-            continue
+        name = (
+            title_item.get("name")
+            or image_item.get("name")
+            or price_item.get("image_name")
+            or fallback_name_from_url(product_url)
+        )
 
-        card = find_card_container(a)
-        card_text = normalize_text(card.get_text(" ", strip=True))
+        price = price_item.get("price") or price_item.get("min_price") or "Цена не найдена"
 
-        name = extract_name_from_card(card, product_url)
-        price = pick_actual_price(card_text)
-        image_url = extract_image_from_card(card)
-
-        if not name:
-            continue
-
-        if product_url not in result_by_url:
-            result_by_url[product_url] = {
+        products.append(
+            {
                 "url": product_url,
                 "name": name,
                 "price": price,
                 "image_url": image_url,
             }
-        else:
-            existing = result_by_url[product_url]
+        )
 
-            if len(name) > len(existing.get("name", "")):
-                existing["name"] = name
+    # Дедупликация по URL
+    by_url = {}
 
-            existing["price"] = choose_better_price(
-                existing.get("price"),
-                price,
-            )
+    for p in products:
+        if p["url"] not in by_url:
+            by_url[p["url"]] = p
+            continue
 
-            if not existing.get("image_url") and image_url:
-                existing["image_url"] = image_url
+        existing = by_url[p["url"]]
 
-    return list(result_by_url.values())
+        if len(p.get("name", "")) > len(existing.get("name", "")):
+            existing["name"] = p["name"]
+
+        if existing.get("price") == "Цена не найдена" and p.get("price") != "Цена не найдена":
+            existing["price"] = p["price"]
+
+        if not existing.get("image_url") and p.get("image_url"):
+            existing["image_url"] = p["image_url"]
+
+    return list(by_url.values())
 
 
 def collect_all_products():
@@ -442,21 +460,7 @@ def collect_all_products():
         before = len(all_by_url)
 
         for product in products:
-            if product["url"] not in all_by_url:
-                all_by_url[product["url"]] = product
-            else:
-                existing = all_by_url[product["url"]]
-
-                if len(product.get("name", "")) > len(existing.get("name", "")):
-                    existing["name"] = product["name"]
-
-                existing["price"] = choose_better_price(
-                    existing.get("price"),
-                    product.get("price"),
-                )
-
-                if not existing.get("image_url") and product.get("image_url"):
-                    existing["image_url"] = product["image_url"]
+            all_by_url[product["url"]] = product
 
         after = len(all_by_url)
         added = after - before
@@ -486,17 +490,41 @@ def send_telegram_message(text):
 
     api_url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
 
-    response = requests.post(
-        api_url,
-        data={
-            "chat_id": CHAT_ID,
-            "text": text,
-            "disable_web_page_preview": False,
-        },
-        timeout=30,
-    )
+    last_error = None
 
-    response.raise_for_status()
+    for attempt in range(1, TELEGRAM_ATTEMPTS + 1):
+        try:
+            response = requests.post(
+                api_url,
+                data={
+                    "chat_id": CHAT_ID,
+                    "text": text,
+                    "disable_web_page_preview": False,
+                },
+                timeout=TELEGRAM_TIMEOUT,
+            )
+
+            if response.status_code == 429:
+                retry_after = response.json().get("parameters", {}).get("retry_after", 10)
+                print(f"Telegram rate limit. Жду {retry_after} сек.", flush=True)
+                time.sleep(retry_after)
+                continue
+
+            response.raise_for_status()
+            return True
+
+        except Exception as e:
+            last_error = e
+            print(
+                f"Ошибка отправки сообщения в Telegram, попытка {attempt}: {e}",
+                flush=True,
+            )
+
+            if attempt < TELEGRAM_ATTEMPTS:
+                time.sleep(5)
+
+    print(f"Не удалось отправить сообщение в Telegram: {last_error}", flush=True)
+    return False
 
 
 def send_telegram_photo(photo_url, name, price, product_url):
@@ -507,25 +535,51 @@ def send_telegram_photo(photo_url, name, price, product_url):
 
     api_url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendPhoto"
 
-    response = requests.post(
-        api_url,
-        data={
-            "chat_id": CHAT_ID,
-            "photo": photo_url,
-            "caption": caption[:1024],
-        },
-        timeout=30,
+    last_error = None
+
+    for attempt in range(1, TELEGRAM_ATTEMPTS + 1):
+        try:
+            response = requests.post(
+                api_url,
+                data={
+                    "chat_id": CHAT_ID,
+                    "photo": photo_url,
+                    "caption": caption[:1024],
+                },
+                timeout=TELEGRAM_TIMEOUT,
+            )
+
+            if response.status_code == 429:
+                retry_after = response.json().get("parameters", {}).get("retry_after", 10)
+                print(f"Telegram rate limit. Жду {retry_after} сек.", flush=True)
+                time.sleep(retry_after)
+                continue
+
+            if response.status_code != 200:
+                print(
+                    f"Не удалось отправить фото, пробую текстом: {response.text}",
+                    flush=True,
+                )
+                return send_telegram_message(caption)
+
+            response.raise_for_status()
+            return True
+
+        except Exception as e:
+            last_error = e
+            print(
+                f"Ошибка отправки фото в Telegram, попытка {attempt}: {e}",
+                flush=True,
+            )
+
+            if attempt < TELEGRAM_ATTEMPTS:
+                time.sleep(5)
+
+    print(
+        f"Не удалось отправить фото в Telegram, пробую текстом: {last_error}",
+        flush=True,
     )
-
-    if response.status_code != 200:
-        print(
-            f"Не удалось отправить фото, отправляю текстом: {response.text}",
-            flush=True,
-        )
-        send_telegram_message(caption)
-        return
-
-    response.raise_for_status()
+    return send_telegram_message(caption)
 
 
 def print_debug(products):
@@ -569,25 +623,42 @@ def main():
     print(f"Новых товаров относительно state.json: {len(new_products)}", flush=True)
 
     if new_products:
+        sent_count = 0
+        failed_count = 0
+
         for p in new_products:
+            ok = False
+
             if p["image_url"]:
-                send_telegram_photo(
+                ok = send_telegram_photo(
                     photo_url=p["image_url"],
                     name=p["name"],
                     price=p["price"],
                     product_url=p["url"],
                 )
+            else:
+                text = f"{p['name']}\n{p['price']}\n{p['url']}"
+                ok = send_telegram_message(text)
+
+            if ok:
+                sent_count += 1
                 print(
-                    f"Отправлено с фото: {p['name']} | {p['price']} | {p['url']}",
+                    f"Отправлено: {p['name']} | {p['price']} | {p['url']}",
                     flush=True,
                 )
             else:
-                text = f"{p['name']}\n{p['price']}\n{p['url']}"
-                send_telegram_message(text)
+                failed_count += 1
                 print(
-                    f"Отправлено без фото: {p['name']} | {p['price']} | {p['url']}",
+                    f"Не удалось отправить: {p['name']} | {p['price']} | {p['url']}",
                     flush=True,
                 )
+
+            time.sleep(TELEGRAM_PAUSE_SECONDS)
+
+        print(
+            f"Итог отправки Telegram: успешно {sent_count}, ошибок {failed_count}",
+            flush=True,
+        )
     else:
         print("Новых подходящих товаров нет.", flush=True)
 
