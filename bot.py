@@ -32,6 +32,8 @@ TELEGRAM_TIMEOUT = 60
 TELEGRAM_ATTEMPTS = 3
 TELEGRAM_PAUSE_SECONDS = 1.2
 
+NOTIFY_COOLDOWN_HOURS = 24
+
 HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -46,22 +48,62 @@ HEADERS = {
 }
 
 
+def normalize_text(text: str) -> str:
+    text = text or ""
+    text = text.replace("\xa0", " ")
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def normalize_for_key(text: str) -> str:
+    text = normalize_text(text).lower()
+    text = text.replace("ё", "е")
+    text = re.sub(r"[^a-zа-я0-9]+", " ", text)
+    return normalize_text(text)
+
+
+def make_product_key(product: dict) -> str:
+    """
+    Стабильный ключ товара.
+
+    Не используем URL, потому что divan.ru может создавать разные art--id
+    для фактически одинакового товара.
+    """
+    name = normalize_for_key(product.get("name", ""))
+    sale_price = normalize_text(product.get("sale_price", ""))
+    old_price = normalize_text(product.get("old_price", ""))
+    discount = normalize_text(product.get("discount", ""))
+
+    return "|".join([name, sale_price, old_price, discount])
+
+
 def load_state():
     if STATE_FILE.exists():
         with open(STATE_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return {"seen": []}
+            data = json.load(f)
+
+        if not isinstance(data, dict):
+            return {
+                "seen": [],
+                "seen_keys": [],
+                "notified_keys": {},
+            }
+
+        data.setdefault("seen", [])
+        data.setdefault("seen_keys", [])
+        data.setdefault("notified_keys", {})
+
+        return data
+
+    return {
+        "seen": [],
+        "seen_keys": [],
+        "notified_keys": {},
+    }
 
 
 def save_state(state):
     with open(STATE_FILE, "w", encoding="utf-8") as f:
         json.dump(state, f, ensure_ascii=False, indent=2)
-
-
-def normalize_text(text: str) -> str:
-    text = text or ""
-    text = text.replace("\xa0", " ")
-    return re.sub(r"\s+", " ", text).strip()
 
 
 def build_page_url(base_url: str, page_num: int) -> str:
@@ -159,21 +201,6 @@ def format_price(value):
         return "Цена не найдена"
 
     return f"{value:,}".replace(",", " ") + " руб."
-
-
-def price_to_int(price: str):
-    if not price or price == "Цена не найдена":
-        return None
-
-    digits = re.sub(r"[^\d]", "", price)
-
-    if not digits:
-        return None
-
-    try:
-        return int(digits)
-    except ValueError:
-        return None
 
 
 def parse_price_values(text: str):
@@ -381,6 +408,7 @@ def get_price_info_from_card(card):
     discounts = parse_discount_values(text)
 
     unique_prices = []
+
     for value in prices:
         if value not in unique_prices:
             unique_prices.append(value)
@@ -474,8 +502,6 @@ def find_strict_card_container(anchor, product_url):
     """
     current = anchor
 
-    best = None
-
     for _ in range(14):
         if current is None:
             break
@@ -488,15 +514,10 @@ def find_strict_card_container(anchor, product_url):
         distinct_urls = count_distinct_product_urls(current)
 
         if has_price and has_img and has_title and distinct_urls <= 3:
-            best = current
-            break
+            return current
 
         current = current.parent
 
-    if best is not None:
-        return best
-
-    # fallback: самый маленький контейнер с ценой и не слишком большим числом товаров
     current = anchor
 
     for _ in range(14):
@@ -526,7 +547,6 @@ def extract_products_from_html(html: str):
         if not href:
             continue
 
-        product_url = normalize_url(href)
         text = clean_product_name(a.get_text(" ", strip=True))
 
         if not text:
@@ -764,6 +784,7 @@ def print_debug(products):
     for idx, p in enumerate(products[:10], start=1):
         print("", flush=True)
         print(f"{idx}. {p['name']}", flush=True)
+        print(f"Ключ: {make_product_key(p)}", flush=True)
         print(f"Цена со скидкой: {p['sale_price']}", flush=True)
         print(f"Старая цена: {p['old_price'] or 'не указана'}", flush=True)
         print(f"Скидка: {p['discount'] or 'не указана'}", flush=True)
@@ -773,7 +794,6 @@ def print_debug(products):
 
 def main():
     state = load_state()
-    seen = set(state.get("seen", []))
 
     products = collect_all_products()
     print_debug(products)
@@ -783,7 +803,51 @@ def main():
         return 0
 
     current_urls = {p["url"] for p in products}
-    new_products = [p for p in products if p["url"] not in seen]
+    current_keys = {make_product_key(p) for p in products}
+
+    seen_urls = set(state.get("seen", []))
+    seen_keys = set(state.get("seen_keys", []))
+    notified_keys = dict(state.get("notified_keys", {}))
+
+    now_ts = time.time()
+    cooldown_seconds = NOTIFY_COOLDOWN_HOURS * 60 * 60
+
+    notified_keys = {
+        key: ts
+        for key, ts in notified_keys.items()
+        if isinstance(ts, (int, float)) and now_ts - ts <= cooldown_seconds
+    }
+
+    # Миграция со старого state.json:
+    # если seen_keys ещё нет, но seen URL есть, не спамим всеми товарами заново.
+    if not seen_keys and seen_urls:
+        seen_keys = {
+            make_product_key(p)
+            for p in products
+            if p["url"] in seen_urls
+        }
+
+    new_products = []
+    keys_in_this_run = set()
+
+    for p in products:
+        product_key = make_product_key(p)
+
+        # Не присылаем одинаковые товары внутри одного запуска.
+        if product_key in keys_in_this_run:
+            continue
+
+        keys_in_this_run.add(product_key)
+
+        # Не присылаем, если такой товар уже был в предыдущем snapshot.
+        if product_key in seen_keys:
+            continue
+
+        # Не присылаем, если такой товар уже отправлялся недавно.
+        if product_key in notified_keys:
+            continue
+
+        new_products.append(p)
 
     print(f"Новых товаров относительно state.json: {len(new_products)}", flush=True)
 
@@ -801,6 +865,8 @@ def main():
 
             if ok:
                 sent_count += 1
+                notified_keys[make_product_key(p)] = now_ts
+
                 print(
                     f"Отправлено: {p['name']} | {p['sale_price']} | {p['url']}",
                     flush=True,
@@ -828,9 +894,16 @@ def main():
             flush=True,
         )
     else:
-        save_state({"seen": sorted(current_urls)})
+        save_state(
+            {
+                "seen": sorted(current_urls),
+                "seen_keys": sorted(current_keys),
+                "notified_keys": notified_keys,
+            }
+        )
         print(
-            f"state.json обновлён. Сохранено товаров: {len(current_urls)}",
+            f"state.json обновлён. Сохранено товаров: {len(current_urls)}, "
+            f"ключей: {len(current_keys)}, notified_keys: {len(notified_keys)}",
             flush=True,
         )
 
