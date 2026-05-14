@@ -28,6 +28,7 @@
     "https://www.divan.ru/product/divan-pryamoj-londi-meh-zelenyj-art--2003938020",
     "https://www.divan.ru/product/divan-pryamoj-mail-1nrl-bukle-bejevyj-art--2003745521",
     "https://www.divan.ru/product/divan-pryamoj-mail-2rl-velyur-olivkovyj-art--2003391162",
+    "https://www.divan.ru/product/divan-pryamoj-masse-art--ek000029929",
     "https://www.divan.ru/product/divan-pryamoj-melou-art--2003909566",
     "https://www.divan.ru/product/divan-pryamoj-milken-vertical-lavender-art--2002256533",
     "https://www.divan.ru/product/divan-pryamoj-ribbl-9-art--2003868974",
@@ -36,6 +37,7 @@
     "https://www.divan.ru/product/divan-pryamoj-siteno-art--2003855466",
     "https://www.divan.ru/product/divan-pryamoj-slipson-art--2003939173",
     "https://www.divan.ru/product/divan-pryamoj-svaut-art--2003895010",
+    "https://www.divan.ru/product/divan-pryamoj-svaut-velyur-bejevyj-art--2002849270",
     "https://www.divan.ru/product/divan-pryamoj-viena-art--2003836827",
     "https://www.divan.ru/product/divan-uglovoj-disent-1-art--2003870544",
     "https://www.divan.ru/product/divan-uglovoj-staus-art--2003578302",
@@ -151,10 +153,12 @@
     "диван прямой льери мини|38 990 руб.|84 990 руб.|54%",
     "диван прямой маиль 1нрл букле бежевый|29 990 руб.|54 990 руб.|45%",
     "диван прямой маиль 2рл велюр оливковый|31 990 руб.|62 990 руб.|49%",
+    "диван прямой массе|39 990 руб.|85 990 руб.|53%",
     "диван прямой мелоу|47 990 руб.|71 990 руб.|33%",
     "диван прямой милкен vertical lavender|17 990 руб.|49 990 руб.|64%",
     "диван прямой риббл 9|36 890 руб.|64 990 руб.|43%",
     "диван прямой самми велюр зеленый|29 990 руб.|36 990 руб.|18%",
+    "диван прямой сваут велюр бежевый|39 990 руб.|69 990 руб.|42%",
     "диван прямой сваут|61 990 руб.|83 990 руб.|26%",
     "диван прямой ситено|51 990 руб.|82 990 руб.|37%",
     "диван прямой слипсон|64 990 руб.|103 990 руб.|37%",
@@ -346,6 +350,8 @@
     "диван прямой шилдс|102 990 руб.|114 990 руб.|10%": 1778764537.144768,
     "кровать эвелен натуральный 160 шенилл белый|32 390 руб.|52 990 руб.|38%": 1778764537.144768,
     "кровать эвелен серый 180 велюр светло серый|49 990 руб.|54 990 руб.|9%": 1778764537.144768,
-    "диван прямой льери мини|38 990 руб.|84 990 руб.|54%": 1778766032.480048
+    "диван прямой льери мини|38 990 руб.|84 990 руб.|54%": 1778766032.480048,
+    "диван прямой массе|39 990 руб.|85 990 руб.|53%": 1778768425.133575,
+    "диван прямой сваут велюр бежевый|39 990 руб.|69 990 руб.|42%": 1778768425.133575
   }
 }
