@@ -37,7 +37,6 @@
     "https://www.divan.ru/product/divan-pryamoj-mare-mini-120-velyur-olivkovyj-art--2003985627",
     "https://www.divan.ru/product/divan-pryamoj-mare-mini-140-velyur-seryj-art--2004120323",
     "https://www.divan.ru/product/divan-pryamoj-masse-art--ek000029929",
-    "https://www.divan.ru/product/divan-pryamoj-nask-2-bukle-bejevyj-art--2003845623",
     "https://www.divan.ru/product/divan-pryamoj-numo-mini-120-rogojka-jeltyj-art--2003125631",
     "https://www.divan.ru/product/divan-pryamoj-numo-velyur-molochnyj-art--2003985292",
     "https://www.divan.ru/product/divan-pryamoj-numo-velyur-svetlo-bejevyj-art--2003825818",
@@ -56,6 +55,7 @@
     "https://www.divan.ru/product/divan-uglovoj-brukvil-velyur-seryj-art--2003653466",
     "https://www.divan.ru/product/divan-uglovoj-disent-1-art--2003870544",
     "https://www.divan.ru/product/divan-uglovoj-disent-1-art--tl000005604",
+    "https://www.divan.ru/product/divan-uglovoj-disent-2-art--2003697713",
     "https://www.divan.ru/product/divan-uglovoj-edvin-art--2003679594",
     "https://www.divan.ru/product/divan-uglovoj-edvin-art--2003839113",
     "https://www.divan.ru/product/divan-uglovoj-laronso-art--2003784337",
@@ -178,7 +178,6 @@
     "диван прямой маре мини 120 велюр оливковый|22 990 руб.|28 990 руб.|20%",
     "диван прямой маре мини 140 велюр серый|26 990 руб.|33 990 руб.|20%",
     "диван прямой массе|39 990 руб.|85 990 руб.|53%",
-    "диван прямой наск 2 букле бежевый|20 990 руб.|33 990 руб.|38%",
     "диван прямой нумо велюр молочный|31 990 руб.|39 990 руб.|20%",
     "диван прямой нумо велюр светло бежевый|31 990 руб.|39 990 руб.|20%",
     "диван прямой нумо мини 120 рогожка желтый|16 990 руб.|27 990 руб.|39%",
@@ -198,6 +197,7 @@
     "диван угловой вайвел|74 990 руб.|119 990 руб.|37%",
     "диван угловой дисент 1|63 990 руб.|116 990 руб.|45%",
     "диван угловой дисент 1|74 990 руб.|119 990 руб.|37%",
+    "диван угловой дисент 2|80 990 руб.|140 990 руб.|42%",
     "диван угловой ларонсо|76 490 руб.|133 990 руб.|42%",
     "диван угловой лилле velvet grey|32 990 руб.|52 990 руб.|37%",
     "диван угловой спейс 2|74 990 руб.|126 990 руб.|40%",
@@ -280,6 +280,7 @@
     "диван прямой риен велюр терракотовый|49 990 руб.|62 990 руб.|20%": 1779204032.6280072,
     "диван модульный этен 5 vertical light|49 990 руб.|79 960 руб.|37%": 1779207629.1932864,
     "кровать сейлор 160 рогожка коричневый|35 990 руб.|41 990 руб.|14%": 1779236182.2232044,
-    "кровать лория 80 велюр светло бежевый|21 890 руб.|49 590 руб.|55%": 1779271250.1236172
+    "кровать лория 80 велюр светло бежевый|21 890 руб.|49 590 руб.|55%": 1779271250.1236172,
+    "диван угловой дисент 2|80 990 руб.|140 990 руб.|42%": 1779273040.045799
   }
 }
