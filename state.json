@@ -2,12 +2,12 @@
   "seen": [
     "https://www.divan.ru/product/divan-modulnyj-eten-7-velvet-molochnyj-art--2863",
     "https://www.divan.ru/product/divan-modulnyj-eten-7-velvet-seryj-art--2860",
+    "https://www.divan.ru/product/divan-modulnyj-eten-velvet-bejevyj-art--2719",
     "https://www.divan.ru/product/divan-modulnyj-eten-velvet-sinij-art--2861",
     "https://www.divan.ru/product/divan-modulnyj-eten-velvet-terrakotovyj-art--2694",
     "https://www.divan.ru/product/divan-modulnyj-eten-velvet-terrakotovyj-art--2801",
     "https://www.divan.ru/product/divan-modulnyj-mail-1-art--2601",
     "https://www.divan.ru/product/divan-modulnyj-mail-1-bucle-silver-art--2588",
-    "https://www.divan.ru/product/divan-modulnyj-mail-1-bukle-molochnyj-art--2866",
     "https://www.divan.ru/product/divan-modulnyj-mail-2-bukle-molochnyj-art--2725",
     "https://www.divan.ru/product/divan-modulnyj-mail-5-art--2455",
     "https://www.divan.ru/product/divan-modulnyj-mail-5-art--2459",
@@ -16,14 +16,14 @@
     "https://www.divan.ru/product/divan-modulnyj-spejs-m-1-art--2722",
     "https://www.divan.ru/product/divan-pryamoj-biani-barhat-latte-art--2002647800",
     "https://www.divan.ru/product/divan-pryamoj-bons-t-art--2004086880",
-    "https://www.divan.ru/product/divan-pryamoj-bons-t-meh-zelenyj-art--2003938005",
+    "https://www.divan.ru/product/divan-pryamoj-bons-t-meh-zelenyj-art--2003938007",
     "https://www.divan.ru/product/divan-pryamoj-bosko-3-land-blue-art--2003549063",
     "https://www.divan.ru/product/divan-pryamoj-brera-1-velour-plum-art--2002647526",
     "https://www.divan.ru/product/divan-pryamoj-brera-1-velyur-seryjsinij-art--2003812873",
     "https://www.divan.ru/product/divan-pryamoj-brera-9-velyur-krasnyj-art--2003792450",
     "https://www.divan.ru/product/divan-pryamoj-disent-art--2003851711",
     "https://www.divan.ru/product/divan-pryamoj-ebi-art--sp000273833",
-    "https://www.divan.ru/product/divan-pryamoj-gardi-bukle-molochnyj-art--2003733921",
+    "https://www.divan.ru/product/divan-pryamoj-gardi-bukle-molochnyj-art--2003733920",
     "https://www.divan.ru/product/divan-pryamoj-klajmar-velyur-svetlo-seryj-art--2003890524",
     "https://www.divan.ru/product/divan-pryamoj-laronso-art--ek000074228",
     "https://www.divan.ru/product/divan-pryamoj-laronso-shenill-pesochnyj-art--2003658346",
@@ -142,7 +142,6 @@
   "seen_keys": [
     "диван модульный альди 5 textile silver|63 990 руб.|167 970 руб.|62%",
     "диван модульный маиль 1 bucle silver|78 990 руб.|132 970 руб.|41%",
-    "диван модульный маиль 1 букле молочный|71 990 руб.|119 980 руб.|40%",
     "диван модульный маиль 1|92 990 руб.|171 970 руб.|46%",
     "диван модульный маиль 2 букле молочный|98 990 руб.|162 970 руб.|39%",
     "диван модульный маиль 5|159 990 руб.|290 960 руб.|45%",
@@ -155,6 +154,7 @@
     "диван модульный этен 7 вельвет серый|50 990 руб.|82 980 руб.|39%",
     "диван модульный этен 7|47 990 руб.|103 980 руб.|54%",
     "диван модульный этен 7|61 990 руб.|122 980 руб.|50%",
+    "диван модульный этен вельвет бежевый|30 990 руб.|55 980 руб.|45%",
     "диван модульный этен вельвет синий|42 990 руб.|76 960 руб.|44%",
     "диван модульный этен вельвет терракотовый|45 990 руб.|79 960 руб.|42%",
     "диван модульный этен вельвет терракотовый|68 990 руб.|108 950 руб.|37%",
@@ -368,6 +368,7 @@
     "диван модульный маиль 5|159 990 руб.|290 960 руб.|45%": 1779720631.4481015,
     "диван модульный спейс м 1|68 990 руб.|134 970 руб.|49%": 1779721251.3671749,
     "диван угловой нумо велюр светло бежевый|36 990 руб.|46 990 руб.|21%": 1779721251.3671749,
-    "диван прямой спейс велюр серый|55 990 руб.|69 990 руб.|20%": 1779721251.3671749
+    "диван прямой спейс велюр серый|55 990 руб.|69 990 руб.|20%": 1779721251.3671749,
+    "диван модульный этен вельвет бежевый|30 990 руб.|55 980 руб.|45%": 1779722426.2296793
   }
 }
