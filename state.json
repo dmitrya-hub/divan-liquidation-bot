@@ -28,9 +28,9 @@
     "https://www.divan.ru/product/divan-pryamoj-brera-1-velour-plum-art--2002647526",
     "https://www.divan.ru/product/divan-pryamoj-brera-9-velyur-krasnyj-art--2003792450",
     "https://www.divan.ru/product/divan-pryamoj-brera-bukle-zelenyj-art--2003760900",
+    "https://www.divan.ru/product/divan-pryamoj-dara-velvet-terrakotovyj-art--2004103931",
     "https://www.divan.ru/product/divan-pryamoj-disent-art--2003851711",
     "https://www.divan.ru/product/divan-pryamoj-ebi-art--sp000273833",
-    "https://www.divan.ru/product/divan-pryamoj-ebi-mini-art--2004155139",
     "https://www.divan.ru/product/divan-pryamoj-gardi-bukle-molochnyj-art--2003733921",
     "https://www.divan.ru/product/divan-pryamoj-klajmar-velyur-svetlo-seryj-art--2003890524",
     "https://www.divan.ru/product/divan-pryamoj-laronso-art--2004095772",
@@ -62,6 +62,7 @@
     "https://www.divan.ru/product/divan-pryamoj-slipson-art--2003558845",
     "https://www.divan.ru/product/divan-pryamoj-svaut-art--2003895010",
     "https://www.divan.ru/product/divan-pryamoj-tilar-art--2003935969",
+    "https://www.divan.ru/product/divan-pryamoj-tilar-art--2003937127",
     "https://www.divan.ru/product/divan-pryamoj-tilar-rogojka-olivkovyj-art--2003934942",
     "https://www.divan.ru/product/divan-pryamoj-vidi-rogojka-jeltyj-art--vl000060395",
     "https://www.divan.ru/product/divan-pryamoj-vienso-meh-bejevyj-art--2003558440",
@@ -87,7 +88,6 @@
     "https://www.divan.ru/product/krovat-darlajn-90-grey-art--sp000252658",
     "https://www.divan.ru/product/krovat-darlajn-90-seryj-art--sp000228541",
     "https://www.divan.ru/product/krovat-eva-180-art--pr000001641",
-    "https://www.divan.ru/product/krovat-evelen-naturalnyj-160-shenill-belyj-art--2003519055",
     "https://www.divan.ru/product/krovat-foster-140-shenill-temno-sinij-art--2003465066",
     "https://www.divan.ru/product/krovat-foster-140-velyur-fioletovyj-art--2003410301",
     "https://www.divan.ru/product/krovat-foster-160-art--2004092907",
@@ -187,6 +187,7 @@
     "диван прямой види рогожка желтый|22 990 руб.|28 990 руб.|21%",
     "диван прямой виенсо мех бежевый|36 990 руб.|62 990 руб.|41%",
     "диван прямой гарди букле молочный|34 990 руб.|38 990 руб.|10%",
+    "диван прямой дара вельвет терракотовый|26 990 руб.|39 990 руб.|33%",
     "диван прямой дисент|67 990 руб.|109 990 руб.|38%",
     "диван прямой клаймар велюр светло серый|33 990 руб.|66 990 руб.|49%",
     "диван прямой лави|32 390 руб.|51 990 руб.|38%",
@@ -217,9 +218,9 @@
     "диван прямой слипсон|34 990 руб.|75 990 руб.|54%",
     "диван прямой сэндж рогожка желтый|29 990 руб.|34 990 руб.|14%",
     "диван прямой тилар рогожка оливковый|19 990 руб.|33 990 руб.|41%",
+    "диван прямой тилар|24 990 руб.|44 690 руб.|44%",
     "диван прямой тилар|29 990 руб.|39 990 руб.|25%",
     "диван прямой шилдс|102 990 руб.|114 990 руб.|10%",
-    "диван прямой эби мини|47 990 руб.|75 990 руб.|37%",
     "диван прямой эби|57 990 руб.|95 990 руб.|40%",
     "диван угловой аллаум вельвет светло серый|31 990 руб.|59 990 руб.|47%",
     "диван угловой вайвел|61 990 руб.|121 190 руб.|49%",
@@ -288,8 +289,7 @@
     "кровать фостер 160|47 990 руб.|77 990 руб.|38%",
     "кровать фромборк 2 140 светло бежевый|14 390 руб.|17 990 руб.|20%",
     "кровать шелдэн 160 рогожка серый|26 990 руб.|49 990 руб.|46%",
-    "кровать шелхорн 180 темно серый|15 890 руб.|26 990 руб.|41%",
-    "кровать эвелен натуральный 160 шенилл белый|32 390 руб.|52 990 руб.|39%"
+    "кровать шелхорн 180 темно серый|15 890 руб.|26 990 руб.|41%"
   ],
   "notified_keys": {
     "кровать шелхорн 180 темно серый|15 890 руб.|26 990 руб.|41%": 1779816326.5738695,
@@ -307,6 +307,8 @@
     "кровать мали 120 черный|12 390 руб.|24 990 руб.|50%": 1779877839.2821918,
     "кровать эвелен натуральный 160 шенилл белый|32 390 руб.|52 990 руб.|39%": 1779878130.0890408,
     "диван прямой брера букле зеленый|57 990 руб.|114 990 руб.|50%": 1779880230.492306,
-    "диван модульный этен 7 вельвет бежевый|69 990 руб.|110 960 руб.|37%": 1779895841.9341202
+    "диван модульный этен 7 вельвет бежевый|69 990 руб.|110 960 руб.|37%": 1779895841.9341202,
+    "диван прямой дара вельвет терракотовый|26 990 руб.|39 990 руб.|33%": 1779897039.3410046,
+    "диван прямой тилар|24 990 руб.|44 690 руб.|44%": 1779897039.3410046
   }
 }
