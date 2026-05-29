@@ -33,7 +33,6 @@
     "https://www.divan.ru/product/divan-pryamoj-gardi-bukle-molochnyj-art--2003733921",
     "https://www.divan.ru/product/divan-pryamoj-laronso-art--2004095772",
     "https://www.divan.ru/product/divan-pryamoj-laronso-shenill-pesochnyj-art--2003658346",
-    "https://www.divan.ru/product/divan-pryamoj-lavi-art--2003785104",
     "https://www.divan.ru/product/divan-pryamoj-leri-1-art--2002186934",
     "https://www.divan.ru/product/divan-pryamoj-lille-art--2004126465",
     "https://www.divan.ru/product/divan-pryamoj-londi-art--2004136871",
@@ -43,6 +42,7 @@
     "https://www.divan.ru/product/divan-pryamoj-mail-1nrl-bukle-molochnyj-art--2003391163",
     "https://www.divan.ru/product/divan-pryamoj-mail-3nrp-art--2003406492",
     "https://www.divan.ru/product/divan-pryamoj-mare-mini-120-velyur-grafitovyj-art--2003620900",
+    "https://www.divan.ru/product/divan-pryamoj-mare-mini-120-velyur-grafitovyj-art--2003900947",
     "https://www.divan.ru/product/divan-pryamoj-mare-mini-120-velyur-jeltyj-art--2003562076",
     "https://www.divan.ru/product/divan-pryamoj-mare-mini-120-velyur-olivkovyj-art--2003985627",
     "https://www.divan.ru/product/divan-pryamoj-masse-art--ek000029929",
@@ -55,6 +55,7 @@
     "https://www.divan.ru/product/divan-pryamoj-shilds-art--2003613903",
     "https://www.divan.ru/product/divan-pryamoj-siteno-art--2003824435",
     "https://www.divan.ru/product/divan-pryamoj-slipson-art--2003558845",
+    "https://www.divan.ru/product/divan-pryamoj-svaut-art--2003854154",
     "https://www.divan.ru/product/divan-pryamoj-svaut-art--2003895010",
     "https://www.divan.ru/product/divan-pryamoj-tilar-art--2003935969",
     "https://www.divan.ru/product/divan-pryamoj-tilar-art--2003937127",
@@ -185,7 +186,6 @@
     "диван прямой гарди букле молочный|34 990 руб.|38 990 руб.|10%",
     "диван прямой дара вельвет терракотовый|26 990 руб.|39 990 руб.|33%",
     "диван прямой дисент|67 990 руб.|109 990 руб.|38%",
-    "диван прямой лави|32 390 руб.|51 990 руб.|38%",
     "диван прямой ларонсо шенилл песочный|75 990 руб.|83 990 руб.|10%",
     "диван прямой ларонсо|67 990 руб.|107 990 руб.|37%",
     "диван прямой лилле|42 990 руб.|69 990 руб.|39%",
@@ -196,6 +196,7 @@
     "диван прямой маиль 1нрл букле молочный|19 590 руб.|54 990 руб.|64%",
     "диван прямой маиль 1нрл|59 990 руб.|67 990 руб.|12%",
     "диван прямой маиль 3нрп|66 990 руб.|74 990 руб.|11%",
+    "диван прямой маре мини 120 велюр графитовый|22 990 руб.|28 990 руб.|21%",
     "диван прямой маре мини 120 велюр графитовый|25 990 руб.|28 990 руб.|10%",
     "диван прямой маре мини 120 велюр желтый|25 990 руб.|28 990 руб.|10%",
     "диван прямой маре мини 120 велюр оливковый|22 990 руб.|28 990 руб.|21%",
@@ -206,6 +207,7 @@
     "диван прямой риен велюр коричневый|49 990 руб.|62 990 руб.|21%",
     "диван прямой самми велюр зеленый|26 990 руб.|36 990 руб.|27%",
     "диван прямой сваут|61 990 руб.|83 990 руб.|26%",
+    "диван прямой сваут|64 990 руб.|91 990 руб.|29%",
     "диван прямой ситено|52 990 руб.|85 990 руб.|38%",
     "диван прямой слипсон|34 990 руб.|75 990 руб.|54%",
     "диван прямой сэндж рогожка желтый|29 990 руб.|34 990 руб.|14%",
@@ -297,6 +299,8 @@
     "диван угловой льери|67 990 руб.|157 990 руб.|57%": 1780043438.4686987,
     "кровать табия 90|34 990 руб.|74 290 руб.|53%": 1780043438.4686987,
     "диван прямой филс мини 120 велюр терракотовый|19 990 руб.|29 990 руб.|33%": 1780043438.4686987,
-    "кровать фостер 200|64 990 руб.|100 990 руб.|36%": 1780043438.4686987
+    "кровать фостер 200|64 990 руб.|100 990 руб.|36%": 1780043438.4686987,
+    "диван прямой маре мини 120 велюр графитовый|22 990 руб.|28 990 руб.|21%": 1780050640.8092122,
+    "диван прямой сваут|64 990 руб.|91 990 руб.|29%": 1780050640.8092122
   }
 }
