@@ -38,6 +38,7 @@
     "https://www.divan.ru/product/divan-pryamoj-mail-3nrp-art--2003406492",
     "https://www.divan.ru/product/divan-pryamoj-mare-mini-120-velyur-grafitovyj-art--2003620900",
     "https://www.divan.ru/product/divan-pryamoj-mare-mini-120-velyur-grafitovyj-art--2003620901",
+    "https://www.divan.ru/product/divan-pryamoj-mare-mini-120-velyur-grafitovyj-art--2003911266",
     "https://www.divan.ru/product/divan-pryamoj-mare-mini-120-velyur-jeltyj-art--2003562076",
     "https://www.divan.ru/product/divan-pryamoj-mare-mini-120-velyur-seryj-art--2004120397",
     "https://www.divan.ru/product/divan-pryamoj-ribbl-2-art--2004095342",
@@ -55,7 +56,10 @@
     "https://www.divan.ru/product/divan-pryamoj-tilar-art--2003937127",
     "https://www.divan.ru/product/divan-pryamoj-tilar-rogojka-olivkovyj-art--2003934942",
     "https://www.divan.ru/product/divan-pryamoj-vidi-rogojka-jeltyj-art--vl000060395",
+    "https://www.divan.ru/product/divan-uglovoj-brukvil-velyur-seryj-art--2003653466",
+    "https://www.divan.ru/product/divan-uglovoj-darol-velvet-zelenyj-art--2003743956",
     "https://www.divan.ru/product/divan-uglovoj-disent-1-art--2003918126",
+    "https://www.divan.ru/product/divan-uglovoj-ebi-2-art--2004124338",
     "https://www.divan.ru/product/divan-uglovoj-edvin-velyur-sero-zelenyj-art--2003411182",
     "https://www.divan.ru/product/divan-uglovoj-haring-art--2003853965",
     "https://www.divan.ru/product/divan-uglovoj-laronso-art--2003784337",
@@ -190,8 +194,10 @@
     "диван прямой тилар|24 990 руб.|44 690 руб.|44%",
     "диван прямой тилар|29 990 руб.|39 990 руб.|25%",
     "диван прямой шилдс|102 990 руб.|114 990 руб.|10%",
+    "диван угловой бруквиль велюр серый|53 990 руб.|59 990 руб.|10%",
     "диван угловой вайвел|61 990 руб.|121 190 руб.|49%",
     "диван угловой вайвел|74 990 руб.|119 990 руб.|38%",
+    "диван угловой дарол вельвет зеленый|57 990 руб.|72 990 руб.|21%",
     "диван угловой дисент 1|109 990 руб.|164 990 руб.|33%",
     "диван угловой ларонсо|68 790 руб.|133 990 руб.|49%",
     "диван угловой лилле velvet grey|19 790 руб.|52 990 руб.|63%",
@@ -201,6 +207,7 @@
     "диван угловой стаус|34 990 руб.|52 990 руб.|34%",
     "диван угловой стаус|48 990 руб.|81 990 руб.|40%",
     "диван угловой харинг|56 990 руб.|112 990 руб.|50%",
+    "диван угловой эби 2|73 990 руб.|125 990 руб.|41%",
     "диван угловой эдвин велюр серо зеленый|47 990 руб.|86 990 руб.|45%",
     "кровать агами 160|48 590 руб.|83 990 руб.|42%",
     "кровать адель 140 велюр светло розовый|25 990 руб.|30 990 руб.|16%",
@@ -293,6 +300,9 @@
     "диван угловой нумо велюр светло бежевый|36 990 руб.|46 990 руб.|21%": 1780313440.2349591,
     "диван прямой спейс|52 990 руб.|86 990 руб.|39%": 1780313440.2349591,
     "диван прямой спейс|53 990 руб.|86 990 руб.|38%": 1780313440.2349591,
-    "диван прямой спейс велюр серый|55 990 руб.|69 990 руб.|20%": 1780313440.2349591
+    "диван прямой спейс велюр серый|55 990 руб.|69 990 руб.|20%": 1780313440.2349591,
+    "диван угловой бруквиль велюр серый|53 990 руб.|59 990 руб.|10%": 1780317048.9739814,
+    "диван угловой дарол вельвет зеленый|57 990 руб.|72 990 руб.|21%": 1780317048.9739814,
+    "диван угловой эби 2|73 990 руб.|125 990 руб.|41%": 1780317048.9739814
   }
 }
