@@ -49,7 +49,6 @@
     "https://www.divan.ru/product/divan-pryamoj-mail-4nrl-bukle-bejevyj-art--2003392899",
     "https://www.divan.ru/product/divan-pryamoj-mare-mini-120-velyur-seryj-art--2004149323",
     "https://www.divan.ru/product/divan-pryamoj-mare-mini-140-velyur-seryj-art--2004149154",
-    "https://www.divan.ru/product/divan-pryamoj-marej-art--2003694936",
     "https://www.divan.ru/product/divan-pryamoj-misl-art--2004131169",
     "https://www.divan.ru/product/divan-pryamoj-numo-velyur-grafitovyj-art--2004164041",
     "https://www.divan.ru/product/divan-pryamoj-numo-velyur-izumrudnyj-art--2004164036",
@@ -86,6 +85,7 @@
     "https://www.divan.ru/product/divan-uglovoj-darol-velvet-zelenyj-art--2003841771",
     "https://www.divan.ru/product/divan-uglovoj-disent-1-art--2003918126",
     "https://www.divan.ru/product/divan-uglovoj-ebi-2-art--2004124338",
+    "https://www.divan.ru/product/divan-uglovoj-edvin-velyur-sero-zelenyj-art--2003900585",
     "https://www.divan.ru/product/divan-uglovoj-haring-shenill-belyj-art--2003524705",
     "https://www.divan.ru/product/divan-uglovoj-haring-shenill-terrakotvyj-art--2003722990",
     "https://www.divan.ru/product/divan-uglovoj-kirmas-5-shenill-grafitovyj-art--2003592576",
@@ -200,7 +200,6 @@
     "диван прямой маиль 4нрл букле бежевый|39 990 руб.|82 990 руб.|52%",
     "диван прямой маре мини 120 велюр серый|22 990 руб.|28 990 руб.|21%",
     "диван прямой маре мини 140 велюр серый|26 990 руб.|33 990 руб.|21%",
-    "диван прямой марей|63 990 руб.|141 990 руб.|55%",
     "диван прямой мисл|54 990 руб.|96 990 руб.|43%",
     "диван прямой нумо велюр графитовый|31 990 руб.|39 990 руб.|20%",
     "диван прямой нумо велюр изумрудный|31 990 руб.|39 990 руб.|20%",
@@ -249,6 +248,7 @@
     "диван угловой харинг шенилл белый|32 990 руб.|114 990 руб.|71%",
     "диван угловой харинг шенилл терракотвый|102 990 руб.|114 990 руб.|10%",
     "диван угловой эби 2|73 990 руб.|125 990 руб.|41%",
+    "диван угловой эдвин велюр серо зеленый|47 990 руб.|86 990 руб.|45%",
     "кровать адель 140 велюр светло розовый|25 990 руб.|30 990 руб.|16%",
     "кровать адона н 160 велюр бежевый|24 990 руб.|44 990 руб.|44%",
     "кровать адона п 160|28 790 руб.|52 990 руб.|46%",
@@ -438,6 +438,7 @@
     "кровать шелхорн 180 темно серый|12 890 руб.|26 990 руб.|52%": 1781595729.7300808,
     "диван прямой эби gene ocean|55 990 руб.|69 990 руб.|20%": 1781595729.7300808,
     "диван прямой эби happy ocean|55 990 руб.|69 990 руб.|20%": 1781595729.7300808,
-    "кровать эвелен серый 140 шенилл молочный|29 990 руб.|53 990 руб.|44%": 1781595729.7300808
+    "кровать эвелен серый 140 шенилл молочный|29 990 руб.|53 990 руб.|44%": 1781595729.7300808,
+    "диван угловой эдвин велюр серо зеленый|47 990 руб.|86 990 руб.|45%": 1781602263.6169813
   }
 }
