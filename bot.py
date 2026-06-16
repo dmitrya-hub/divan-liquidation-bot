@@ -26,13 +26,17 @@ CHAT_ID = os.getenv("CHAT_ID")
 
 MAX_PAGES = 10
 REQUEST_TIMEOUT = 45
+
 MIN_PRODUCTS_TO_SAVE_STATE = 50
+MIN_PRODUCTS_AFTER_PAGINATION_END = 80
 
 TELEGRAM_TIMEOUT = 60
 TELEGRAM_ATTEMPTS = 3
 TELEGRAM_PAUSE_SECONDS = 1.2
 
 NOTIFY_COOLDOWN_HOURS = 24
+
+EXPECTED_PRODUCTS_PER_FULL_PAGE = 48
 
 HEADERS = {
     "User-Agent": (
@@ -129,8 +133,9 @@ def build_page_url(base_url: str, page_num: int) -> str:
     )
 
 
-def fetch_html(url: str, attempts: int = 3) -> str:
+def fetch_html(url: str, attempts: int = 3):
     last_error = None
+    last_status_code = None
 
     for attempt in range(1, attempts + 1):
         try:
@@ -142,10 +147,14 @@ def fetch_html(url: str, attempts: int = 3) -> str:
                 timeout=REQUEST_TIMEOUT,
             )
 
+            last_status_code = response.status_code
             print(f"HTTP status: {response.status_code}", flush=True)
 
+            if response.status_code == 404:
+                return None, 404
+
             response.raise_for_status()
-            return response.text
+            return response.text, response.status_code
 
         except Exception as e:
             last_error = e
@@ -155,7 +164,8 @@ def fetch_html(url: str, attempts: int = 3) -> str:
                 time.sleep(5)
 
     raise RuntimeError(
-        f"Не удалось загрузить страницу после {attempts} попыток: {last_error}"
+        f"Не удалось загрузить страницу после {attempts} попыток. "
+        f"Последний HTTP status: {last_status_code}. Ошибка: {last_error}"
     )
 
 
@@ -610,10 +620,35 @@ def extract_products_from_html(html: str):
 def collect_all_products():
     all_by_url = {}
     expected_total = None
+    pagination_ended_normally = False
 
     for page_num in range(1, MAX_PAGES + 1):
         page_url = build_page_url(CATALOG_URL, page_num)
-        html = fetch_html(page_url)
+
+        html, status_code = fetch_html(page_url)
+
+        if status_code == 404:
+            if page_num == 1:
+                raise RuntimeError("Первая страница каталога вернула 404")
+
+            print(
+                f"Страница {page_num} вернула 404. "
+                "Считаю это концом пагинации и завершаю обход.",
+                flush=True,
+            )
+            pagination_ended_normally = True
+            break
+
+        if not html:
+            if page_num == 1:
+                raise RuntimeError("Первая страница каталога не загрузилась")
+
+            print(
+                f"Страница {page_num} пустая. Завершаю обход.",
+                flush=True,
+            )
+            pagination_ended_normally = True
+            break
 
         if page_num == 1:
             expected_total = extract_total_products(html)
@@ -639,17 +674,42 @@ def collect_all_products():
         )
         print(f"Всего уникальных товаров: {after}", flush=True)
 
-        if expected_total and after >= expected_total:
-            print("Достигли ожидаемого количества товаров.", flush=True)
+        if page_num > 1 and added == 0:
+            print(
+                "На странице нет новых уникальных товаров. Завершаю обход.",
+                flush=True,
+            )
+            pagination_ended_normally = True
             break
 
-        if page_num > 1 and added == 0:
-            print("Новых товаров на странице нет, завершаю обход.", flush=True)
+        if products and len(products) < EXPECTED_PRODUCTS_PER_FULL_PAGE:
+            print(
+                f"Страница {page_num} содержит меньше "
+                f"{EXPECTED_PRODUCTS_PER_FULL_PAGE} товаров. "
+                "Похоже, это последняя страница. Завершаю обход.",
+                flush=True,
+            )
+            pagination_ended_normally = True
             break
 
         time.sleep(1)
 
-    return list(all_by_url.values())
+    else:
+        print(
+            f"Достигнут лимит MAX_PAGES={MAX_PAGES}. Завершаю обход.",
+            flush=True,
+        )
+
+    collected_total = len(all_by_url)
+
+    print(
+        f"Обход завершён. Собрано товаров: {collected_total}. "
+        f"Ожидаемое число с сайта: {expected_total}. "
+        f"Пагинация завершилась нормально: {pagination_ended_normally}",
+        flush=True,
+    )
+
+    return list(all_by_url.values()), expected_total, pagination_ended_normally
 
 
 def build_telegram_text(product):
@@ -795,7 +855,7 @@ def print_debug(products):
 def main():
     state = load_state()
 
-    products = collect_all_products()
+    products, expected_total, pagination_ended_normally = collect_all_products()
     print_debug(products)
 
     if not products:
@@ -887,10 +947,23 @@ def main():
     else:
         print("Новых подходящих товаров нет.", flush=True)
 
-    if len(current_urls) < MIN_PRODUCTS_TO_SAVE_STATE:
+    collected_count = len(current_urls)
+
+    too_few_absolute = collected_count < MIN_PRODUCTS_TO_SAVE_STATE
+
+    too_few_after_normal_pagination_end = (
+        pagination_ended_normally
+        and collected_count < MIN_PRODUCTS_AFTER_PAGINATION_END
+    )
+
+    if too_few_absolute or too_few_after_normal_pagination_end:
         print(
-            f"Найдено подозрительно мало товаров: {len(current_urls)}. "
-            "state.json не обновляю, чтобы не вызвать ложные повторные уведомления.",
+            f"state.json не обновляю. "
+            f"Собрано товаров: {collected_count}. "
+            f"Минимум абсолютный: {MIN_PRODUCTS_TO_SAVE_STATE}. "
+            f"Минимум при нормальном конце пагинации: {MIN_PRODUCTS_AFTER_PAGINATION_END}. "
+            f"Ожидаемое число с сайта: {expected_total}. "
+            f"Пагинация завершилась нормально: {pagination_ended_normally}.",
             flush=True,
         )
     else:
@@ -902,7 +975,7 @@ def main():
             }
         )
         print(
-            f"state.json обновлён. Сохранено товаров: {len(current_urls)}, "
+            f"state.json обновлён. Сохранено товаров: {collected_count}, "
             f"ключей: {len(current_keys)}, notified_keys: {len(notified_keys)}",
             flush=True,
         )
