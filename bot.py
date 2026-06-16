@@ -36,7 +36,7 @@ TELEGRAM_PAUSE_SECONDS = 1.2
 
 NOTIFY_COOLDOWN_HOURS = 24
 
-EXPECTED_PRODUCTS_PER_FULL_PAGE = 48
+TARGET_PRODUCT_URL_FRAGMENT = "krovat-pajl-180-art--2004181402"
 
 HEADERS = {
     "User-Agent": (
@@ -66,12 +66,6 @@ def normalize_for_key(text: str) -> str:
 
 
 def make_product_key(product: dict) -> str:
-    """
-    Стабильный ключ товара.
-
-    Не используем URL, потому что divan.ru может создавать разные art--id
-    для фактически одинакового товара.
-    """
     name = normalize_for_key(product.get("name", ""))
     sale_price = normalize_text(product.get("sale_price", ""))
     old_price = normalize_text(product.get("old_price", ""))
@@ -214,15 +208,6 @@ def format_price(value):
 
 
 def parse_price_values(text: str):
-    """
-    Ищет цены вида:
-    92 990 руб.
-    171 970 руб.
-    12990 руб.
-
-    Не склеивает скидку и цену:
-    45 92 990 руб. -> 92 990 руб.
-    """
     if not text:
         return []
 
@@ -251,11 +236,6 @@ def parse_price_values(text: str):
 
 
 def parse_discount_values(text: str):
-    """
-    Ищет скидки.
-    Часто в карточке скидка отдается как отдельное число 30 / 45 / 55.
-    Также поддерживаем варианты -45%, 45%.
-    """
     if not text:
         return []
 
@@ -297,35 +277,86 @@ def clean_product_name(text: str) -> str:
 
     low = text.lower()
 
-    if low in {"купить", "в корзину"}:
+    bad_exact_values = {
+        "купить",
+        "в корзину",
+        "товар",
+        "новинка",
+        "хит",
+        "sale",
+        "распродажа",
+    }
+
+    if low in bad_exact_values:
         return ""
 
-    if "руб" in low or "₽" in low:
+    bad_substrings = [
+        "руб",
+        "₽",
+        "в наличии",
+        "размеры",
+        "спальное место",
+        "доставка",
+        "самовывоз",
+        "рассрочка",
+        "отзывы",
+        "смотреть все",
+        "найдено",
+        "показать",
+        "фильтр",
+        "сортировка",
+    ]
+
+    for value in bad_substrings:
+        if value in low:
+            return ""
+
+    if re.fullmatch(r"\d+", text):
         return ""
 
-    if "в наличии" in low:
-        return ""
-
-    if "размеры" in low:
-        return ""
-
-    if "спальное место" in low:
-        return ""
-
-    if len(text) < 5:
+    if len(text) < 3:
         return ""
 
     return text
 
 
-def is_product_name(text: str) -> bool:
-    low = normalize_text(text).lower()
+def looks_like_product_name(text: str) -> bool:
+    """
+    Ослабленный фильтр.
 
-    return (
-        low.startswith("диван")
-        or low.startswith("кровать")
-        or low.startswith("модульный диван")
-    )
+    Раньше пропускали только названия, начинающиеся с Диван/Кровать.
+    Но divan.ru иногда отдаёт названия как Маиль-1, Альди-5, Полан-4.
+    Поэтому разрешаем более общий формат, но мусор режем в clean_product_name().
+    """
+    text = clean_product_name(text)
+
+    if not text:
+        return False
+
+    low = text.lower()
+
+    strong_prefixes = [
+        "диван",
+        "кровать",
+        "модульный диван",
+        "прямой диван",
+        "угловой диван",
+        "кресло-кровать",
+    ]
+
+    if any(low.startswith(prefix) for prefix in strong_prefixes):
+        return True
+
+    # Названия вроде Альди-5, Маиль-1, Полан-4, Спейс-М 1.
+    if re.search(r"[а-яa-z]", low) and re.search(r"\d", low):
+        return True
+
+    # Названия из 1-4 слов без мусора.
+    words = low.split()
+    if 1 <= len(words) <= 5 and re.search(r"[а-яa-z]", low):
+        return True
+
+    return False
 
 
 def get_image_url_from_card(card):
@@ -384,7 +415,7 @@ def get_name_from_card(card, product_url):
             if attr_value:
                 candidates.append(attr_value)
 
-    product_like = [c for c in candidates if is_product_name(c)]
+    product_like = [c for c in candidates if looks_like_product_name(c)]
 
     if product_like:
         return max(product_like, key=len)
@@ -404,15 +435,6 @@ def fallback_name_from_url(product_url: str) -> str:
 
 
 def get_price_info_from_card(card):
-    """
-    Возвращает:
-    - sale_price: цена со скидкой
-    - old_price: старая цена
-    - discount: скидка в %
-
-    Берём цены только из конкретной карточки.
-    Если в карточке 2 цены — меньшую считаем скидочной, большую старой.
-    """
     text = card.get_text("\n", strip=True)
     prices = parse_price_values(text)
     discounts = parse_discount_values(text)
@@ -494,22 +516,13 @@ def has_title_for_url(element, product_url):
 
         text = clean_product_name(a.get_text(" ", strip=True))
 
-        if text and is_product_name(text):
+        if text and looks_like_product_name(text):
             return True
 
     return False
 
 
 def find_strict_card_container(anchor, product_url):
-    """
-    Ищем минимальный контейнер именно этой карточки.
-
-    Важно:
-    - контейнер должен содержать ссылку-картинку именно на этот URL;
-    - контейнер должен содержать ссылку-название именно на этот URL;
-    - контейнер должен содержать цену;
-    - контейнер не должен содержать много разных товаров, иначе это уже сетка/общий блок.
-    """
     current = anchor
 
     for _ in range(14):
@@ -548,8 +561,7 @@ def extract_products_from_html(html: str):
     soup = BeautifulSoup(html, "html.parser")
 
     result_by_url = {}
-
-    title_links = []
+    candidate_links = []
 
     for a in soup.select('a[href*="/product/"]'):
         href = a.get("href")
@@ -558,18 +570,20 @@ def extract_products_from_html(html: str):
             continue
 
         text = clean_product_name(a.get_text(" ", strip=True))
+        product_url = normalize_url(href)
 
-        if not text:
-            continue
+        # Берём:
+        # 1. ссылки с нормальным текстом-названием;
+        # 2. ссылки-картинки без текста, если внутри img;
+        # 3. целевой товар по URL для диагностики.
+        has_img = bool(a.select_one("img"))
 
-        if not is_product_name(text):
-            continue
+        if looks_like_product_name(text) or has_img or TARGET_PRODUCT_URL_FRAGMENT in product_url:
+            candidate_links.append(a)
 
-        title_links.append(a)
+    print(f"Найдено candidate-ссылок товаров: {len(candidate_links)}", flush=True)
 
-    print(f"Найдено title-ссылок товаров: {len(title_links)}", flush=True)
-
-    for a in title_links:
+    for a in candidate_links:
         href = a.get("href")
 
         if not href:
@@ -585,6 +599,9 @@ def extract_products_from_html(html: str):
         if not name:
             continue
 
+        if price_info["sale_price"] == "Цена не найдена":
+            continue
+
         product = {
             "url": product_url,
             "name": name,
@@ -593,6 +610,14 @@ def extract_products_from_html(html: str):
             "discount": price_info["discount"],
             "image_url": image_url,
         }
+
+        if TARGET_PRODUCT_URL_FRAGMENT in product_url:
+            print(
+                f"TARGET FOUND: {product['name']} | "
+                f"{product['sale_price']} | {product['old_price']} | "
+                f"{product['discount']} | {product['url']}",
+                flush=True,
+            )
 
         if product_url not in result_by_url:
             result_by_url[product_url] = product
@@ -677,16 +702,6 @@ def collect_all_products():
         if page_num > 1 and added == 0:
             print(
                 "На странице нет новых уникальных товаров. Завершаю обход.",
-                flush=True,
-            )
-            pagination_ended_normally = True
-            break
-
-        if products and len(products) < EXPECTED_PRODUCTS_PER_FULL_PAGE:
-            print(
-                f"Страница {page_num} содержит меньше "
-                f"{EXPECTED_PRODUCTS_PER_FULL_PAGE} товаров. "
-                "Похоже, это последняя страница. Завершаю обход.",
                 flush=True,
             )
             pagination_ended_normally = True
@@ -838,6 +853,28 @@ def print_debug(products):
     print(f"Без цены: {len(without_price)}", flush=True)
     print(f"Без картинки: {len(without_image)}", flush=True)
 
+    target_products = [
+        p for p in products if TARGET_PRODUCT_URL_FRAGMENT in p["url"]
+    ]
+
+    if target_products:
+        print("", flush=True)
+        print("========== TARGET PRODUCT ==========", flush=True)
+
+        for p in target_products:
+            print(f"{p['name']}", flush=True)
+            print(f"Цена со скидкой: {p['sale_price']}", flush=True)
+            print(f"Старая цена: {p['old_price'] or 'не указана'}", flush=True)
+            print(f"Скидка: {p['discount'] or 'не указана'}", flush=True)
+            print(f"Картинка: {p['image_url'] or 'КАРТИНКА НЕ НАЙДЕНА'}", flush=True)
+            print(f"Ссылка: {p['url']}", flush=True)
+    else:
+        print("", flush=True)
+        print(
+            f"TARGET PRODUCT НЕ НАЙДЕН: {TARGET_PRODUCT_URL_FRAGMENT}",
+            flush=True,
+        )
+
     print("", flush=True)
     print("========== ПЕРВЫЕ 10 ТОВАРОВ ==========", flush=True)
 
@@ -878,8 +915,6 @@ def main():
         if isinstance(ts, (int, float)) and now_ts - ts <= cooldown_seconds
     }
 
-    # Миграция со старого state.json:
-    # если seen_keys ещё нет, но seen URL есть, не спамим всеми товарами заново.
     if not seen_keys and seen_urls:
         seen_keys = {
             make_product_key(p)
@@ -893,17 +928,14 @@ def main():
     for p in products:
         product_key = make_product_key(p)
 
-        # Не присылаем одинаковые товары внутри одного запуска.
         if product_key in keys_in_this_run:
             continue
 
         keys_in_this_run.add(product_key)
 
-        # Не присылаем, если такой товар уже был в предыдущем snapshot.
         if product_key in seen_keys:
             continue
 
-        # Не присылаем, если такой товар уже отправлялся недавно.
         if product_key in notified_keys:
             continue
 
