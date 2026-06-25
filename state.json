@@ -67,8 +67,8 @@
     "https://www.divan.ru/product/divan-pryamoj-rotterdam-art--2004092097",
     "https://www.divan.ru/product/divan-pryamoj-sammi-velyur-zelenyj-art--2002876874",
     "https://www.divan.ru/product/divan-pryamoj-sendj-rogojka-jltyj-art--2003655418",
+    "https://www.divan.ru/product/divan-pryamoj-shilds-art--2003613903",
     "https://www.divan.ru/product/divan-pryamoj-siteno-art--2003855466",
-    "https://www.divan.ru/product/divan-pryamoj-spejs-velyur-svetlo-seryj-art--2003868472",
     "https://www.divan.ru/product/divan-pryamoj-svaut-velyur-bejevyj-art--2003800790",
     "https://www.divan.ru/product/divan-pryamoj-tilar-art--2003937127",
     "https://www.divan.ru/product/divan-pryamoj-vienso-bukle-temno-seryj-art--2004165241",
@@ -89,6 +89,7 @@
     "https://www.divan.ru/product/divan-uglovoj-edvin-art--2003717137",
     "https://www.divan.ru/product/divan-uglovoj-edvin-velyur-svetlo-seryj-art--2004132060",
     "https://www.divan.ru/product/divan-uglovoj-haring-art--2004121018",
+    "https://www.divan.ru/product/divan-uglovoj-haring-shenill-terrakotvyj-art--2003722990",
     "https://www.divan.ru/product/divan-uglovoj-kirmas-5-shenill-grafitovyj-art--2003592576",
     "https://www.divan.ru/product/divan-uglovoj-klajmar-velyur-seryj-art--2003836458",
     "https://www.divan.ru/product/divan-uglovoj-klajmar-velyur-svetlo-seryj-art--2003836456",
@@ -112,7 +113,6 @@
     "https://www.divan.ru/product/krovat-eva-160-art--2004156880",
     "https://www.divan.ru/product/krovat-eva-180-art--pr000001641",
     "https://www.divan.ru/product/krovat-foster-160-soft-night-art--2003288242",
-    "https://www.divan.ru/product/krovat-foster-160-velyur-svetlo-seryj-art--2004099967",
     "https://www.divan.ru/product/krovat-foster-200-art--2004128723",
     "https://www.divan.ru/product/krovat-frombork-2-140-svetlo-bejevyj-art--2003719620",
     "https://www.divan.ru/product/krovat-kejla-90-art--2003805220",
@@ -207,11 +207,11 @@
     "диван прямой самми велюр зеленый|21 990 руб.|36 990 руб.|41%",
     "диван прямой сваут велюр бежевый|64 990 руб.|71 990 руб.|10%",
     "диван прямой ситено|51 990 руб.|82 990 руб.|37%",
-    "диван прямой спейс велюр светло серый|37 990 руб.|69 990 руб.|46%",
     "диван прямой сэндж рогожка желтый|24 290 руб.|34 990 руб.|31%",
     "диван прямой тилар|14 990 руб.|44 690 руб.|66%",
     "диван прямой филс мини 140 велюр бежевый|31 990 руб.|34 990 руб.|9%",
     "диван прямой филс мини 140|32 990 руб.|45 990 руб.|28%",
+    "диван прямой шилдс|102 990 руб.|114 990 руб.|10%",
     "диван прямой эби gene ocean|55 990 руб.|69 990 руб.|20%",
     "диван прямой эби happy ocean|55 990 руб.|69 990 руб.|20%",
     "диван угловой аронт мини велюр молочный|59 990 руб.|66 990 руб.|10%",
@@ -237,6 +237,7 @@
     "диван угловой нордика мини велюр синий|39 990 руб.|62 990 руб.|37%",
     "диван угловой нумо велюр светло серый|40 490 руб.|49 990 руб.|19%",
     "диван угловой онте|93 990 руб.|148 990 руб.|37%",
+    "диван угловой харинг шенилл терракотвый|102 990 руб.|114 990 руб.|10%",
     "диван угловой харинг|64 990 руб.|106 990 руб.|39%",
     "диван угловой эби 2|73 990 руб.|125 990 руб.|41%",
     "диван угловой эдвин велюр светло серый|69 990 руб.|86 990 руб.|20%",
@@ -278,7 +279,6 @@
     "кровать табия 90 шенилл мятный|42 990 руб.|65 990 руб.|35%",
     "кровать табия 90|31 990 руб.|54 990 руб.|42%",
     "кровать табия 90|39 990 руб.|64 290 руб.|38%",
-    "кровать фостер 160 велюр светло серый|36 990 руб.|60 990 руб.|39%",
     "кровать фостер 160 шенилл темно синий|29 990 руб.|42 990 руб.|30%",
     "кровать фостер 200|58 490 руб.|100 990 руб.|42%",
     "кровать фромборк 2 140 светло бежевый|11 690 руб.|17 990 руб.|35%",
@@ -304,9 +304,10 @@
     "этен|41 870 руб.|83 970 руб.|50%"
   ],
   "notified_keys": {
-    "диван прямой маре мини 120 велюр серый|22 990 руб.|28 990 руб.|21%": 1782295276.422733,
     "диван угловой лаберт|35 990 руб.|63 990 руб.|44%": 1782300346.2145214,
     "диван прямой спейс велюр светло серый|37 990 руб.|69 990 руб.|46%": 1782380148.5844421,
-    "кровать фостер 160 велюр светло серый|36 990 руб.|60 990 руб.|39%": 1782380148.5844421
+    "кровать фостер 160 велюр светло серый|36 990 руб.|60 990 руб.|39%": 1782380148.5844421,
+    "диван угловой харинг шенилл терракотвый|102 990 руб.|114 990 руб.|10%": 1782381713.6094973,
+    "диван прямой шилдс|102 990 руб.|114 990 руб.|10%": 1782381713.6094973
   }
 }
