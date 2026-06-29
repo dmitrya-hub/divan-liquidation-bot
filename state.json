@@ -5,7 +5,6 @@
     "https://www.divan.ru/product/divan-modulnyj-eten-velvet-bejevyj-art--2719",
     "https://www.divan.ru/product/divan-modulnyj-eten-velvet-terrakotovyj-art--2703",
     "https://www.divan.ru/product/divan-modulnyj-eten-velvet-terrakotovyj-art--2801",
-    "https://www.divan.ru/product/divan-modulnyj-eten-velvet-terrakotovyj-art--2875",
     "https://www.divan.ru/product/divan-modulnyj-eten-vertical-grafit-art--2493",
     "https://www.divan.ru/product/divan-modulnyj-mail-1-art--2485",
     "https://www.divan.ru/product/divan-modulnyj-mail-1-velyur-olivkovyj-art--2696",
@@ -26,6 +25,7 @@
     "https://www.divan.ru/product/divan-pryamoj-brera-9-bucle-beige-art--kr000046119",
     "https://www.divan.ru/product/divan-pryamoj-brukvil-velyur-svetlo-seryj-art--2003836514",
     "https://www.divan.ru/product/divan-pryamoj-dansta-art--2004092094",
+    "https://www.divan.ru/product/divan-pryamoj-dansta-velyur-svetlo-seryj-art--2003841627",
     "https://www.divan.ru/product/divan-pryamoj-ebi-gene-ocean-art--2004165251",
     "https://www.divan.ru/product/divan-pryamoj-ebi-gene-ocean-art--2004165252",
     "https://www.divan.ru/product/divan-pryamoj-ebi-happy-ocean-art--2004165250",
@@ -156,6 +156,7 @@
     "диван прямой винси|21 990 руб.|33 990 руб.|35%",
     "диван прямой гарди букле молочный|34 990 руб.|38 990 руб.|10%",
     "диван прямой гарди шенилл серый|26 990 руб.|43 990 руб.|39%",
+    "диван прямой данста велюр светло серый|56 990 руб.|62 990 руб.|10%",
     "диван прямой данста|51 290 руб.|75 990 руб.|33%",
     "диван прямой кейсес 120 velvet latte|23 990 руб.|29 990 руб.|20%",
     "диван прямой кейсес 120 велюр розовый|23 990 руб.|29 990 руб.|20%",
@@ -271,7 +272,6 @@
     "этен вельвет бежевый|22 880 руб.|55 980 руб.|59%",
     "этен вельвет терракотовый|44 570 руб.|78 970 руб.|44%",
     "этен вельвет терракотовый|62 050 руб.|108 950 руб.|43%",
-    "этен вельвет терракотовый|88 990 руб.|159 950 руб.|44%",
     "этен|35 570 руб.|83 970 руб.|58%",
     "этен|41 870 руб.|83 970 руб.|50%"
   ],
@@ -302,6 +302,7 @@
     "диван прямой мелоу|64 990 руб.|101 990 руб.|36%": 1782743730.8203247,
     "кровать кевия 200|59 990 руб.|91 990 руб.|35%": 1782750933.0085084,
     "спейс м 1 велюр оливковый|50 990 руб.|94 980 руб.|46%": 1782754246.4706519,
-    "этен вельвет терракотовый|88 990 руб.|159 950 руб.|44%": 1782754246.4706519
+    "этен вельвет терракотовый|88 990 руб.|159 950 руб.|44%": 1782754246.4706519,
+    "диван прямой данста велюр светло серый|56 990 руб.|62 990 руб.|10%": 1782755439.197163
   }
 }
