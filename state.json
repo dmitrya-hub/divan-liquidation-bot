@@ -8,7 +8,6 @@
     "https://www.divan.ru/product/divan-modulnyj-mail-5-art--2515",
     "https://www.divan.ru/product/divan-modulnyj-nolan-1-shenill-belyj-art--2741",
     "https://www.divan.ru/product/divan-modulnyj-nolan-1-shenill-latte-art--2740",
-    "https://www.divan.ru/product/divan-modulnyj-spejs-m-1-art--2873",
     "https://www.divan.ru/product/divan-modulnyj-spejs-m-1-art--2883",
     "https://www.divan.ru/product/divan-modulnyj-spejs-m-1-shenill-svetlo-seryj-art--2877",
     "https://www.divan.ru/product/divan-modulnyj-spejs-m-3-art--2499",
@@ -43,6 +42,7 @@
     "https://www.divan.ru/product/divan-pryamoj-londi-meh-zelenyj-art--2003938019",
     "https://www.divan.ru/product/divan-pryamoj-londi-meh-zelenyj-art--2003938021",
     "https://www.divan.ru/product/divan-pryamoj-mail-1nrl-art--2003548049",
+    "https://www.divan.ru/product/divan-pryamoj-mail-1nrl-bukle-molochnyj-art--2003391163",
     "https://www.divan.ru/product/divan-pryamoj-mail-3nrl-art--2004096218",
     "https://www.divan.ru/product/divan-pryamoj-melou-art--2004141696",
     "https://www.divan.ru/product/divan-pryamoj-melou-art--2004213968",
@@ -168,6 +168,7 @@
     "диван прямой лонди мех коричневый|43 190 руб.|52 990 руб.|18%",
     "диван прямой лонди мех терракотовый|41 990 руб.|52 990 руб.|21%",
     "диван прямой льери велюр бежевый|84 990 руб.|94 990 руб.|11%",
+    "диван прямой маиль 1нрл букле молочный|19 590 руб.|54 990 руб.|64%",
     "диван прямой маиль 1нрл|59 990 руб.|67 990 руб.|12%",
     "диван прямой маиль 3нрл|68 990 руб.|85 990 руб.|20%",
     "диван прямой мелоу|44 990 руб.|65 990 руб.|32%",
@@ -265,7 +266,6 @@
     "полан 1 velvet smoke|62 990 руб.|142 950 руб.|56%",
     "полан 1|59 990 руб.|142 960 руб.|58%",
     "спейс м 1 шенилл светло серый|48 990 руб.|88 970 руб.|45%",
-    "спейс м 1|50 990 руб.|109 970 руб.|54%",
     "спейс м 1|92 990 руб.|203 950 руб.|54%",
     "спейс м 3|90 990 руб.|180 950 руб.|50%",
     "этен 1 вельвет серый|75 990 руб.|116 950 руб.|35%",
@@ -326,6 +326,7 @@
     "диван угловой виена велюр терракотовый|64 990 руб.|72 990 руб.|11%": 1783336845.5824845,
     "кровать лория 80 велюр светло бежевый|21 890 руб.|42 990 руб.|49%": 1783336845.5824845,
     "диван угловой нордика мини велюр оливковый|56 990 руб.|62 990 руб.|10%": 1783336845.5824845,
-    "диван угловой онте рогожка графитовый|107 990 руб.|133 990 руб.|19%": 1783336845.5824845
+    "диван угловой онте рогожка графитовый|107 990 руб.|133 990 руб.|19%": 1783336845.5824845,
+    "диван прямой маиль 1нрл букле молочный|19 590 руб.|54 990 руб.|64%": 1783338331.6121535
   }
 }
