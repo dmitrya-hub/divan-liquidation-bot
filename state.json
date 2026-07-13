@@ -8,6 +8,7 @@
     "https://www.divan.ru/product/divan-modulnyj-spejs-m-1-art--2883",
     "https://www.divan.ru/product/divan-modulnyj-spejs-m-1-shenill-svetlo-seryj-art--2877",
     "https://www.divan.ru/product/divan-pryamoj-aldi-10-bucle-white-art--2003341284",
+    "https://www.divan.ru/product/divan-pryamoj-aront-mini-velyur-seryj-art--2003827794",
     "https://www.divan.ru/product/divan-pryamoj-aront-mini-velyur-seryj-art--2003841437",
     "https://www.divan.ru/product/divan-pryamoj-aront-mini-velyur-seryj-art--2003841439",
     "https://www.divan.ru/product/divan-pryamoj-biani-barhat-latte-art--2002647800",
@@ -64,6 +65,7 @@
     "https://www.divan.ru/product/divan-uglovoj-onte-art--2004223753",
     "https://www.divan.ru/product/divan-uglovoj-staus-art--2003909390",
     "https://www.divan.ru/product/divan-uglovoj-vajvel-p-shenill-belyj-art--2003851993",
+    "https://www.divan.ru/product/divan-uglovoj-vajvel-p-shenill-seryj-art--kz000027416",
     "https://www.divan.ru/product/divan-uglovoj-viena-art--2004206158",
     "https://www.divan.ru/product/divan-uglovoj-viena-velyur-olivkovyj-art--2003811764",
     "https://www.divan.ru/product/divan-uglovoj-viena-velyur-terrakotovyj-art--2003857374",
@@ -74,6 +76,7 @@
     "https://www.divan.ru/product/krovat-foster-160-soft-night-art--2003288242",
     "https://www.divan.ru/product/krovat-frombork-2-140-svetlo-bejevyj-art--2003719619",
     "https://www.divan.ru/product/krovat-frombork-2-140-svetlo-bejevyj-art--2003719620",
+    "https://www.divan.ru/product/krovat-kejla-80-velyur-svetlo-bejevyj-art--2004143771",
     "https://www.divan.ru/product/krovat-kejla-90-art--2003805218",
     "https://www.divan.ru/product/krovat-kejla-90-art--2004177996",
     "https://www.divan.ru/product/krovat-kejla-90-velyur-goluboj-art--2003691089",
@@ -107,6 +110,7 @@
     "альди 1|67 990 руб.|133 980 руб.|49%",
     "диван прямой альди 10 букле молочный|30 390 руб.|78 990 руб.|62%",
     "диван прямой аронт мини велюр серый|46 190 руб.|62 990 руб.|27%",
+    "диван прямой аронт мини велюр серый|51 290 руб.|62 990 руб.|19%",
     "диван прямой аронт мини велюр серый|56 990 руб.|62 990 руб.|10%",
     "диван прямой биани велюр латте|36 990 руб.|40 700 руб.|9%",
     "диван прямой бонс т вельвет зеленый|34 990 руб.|38 990 руб.|10%",
@@ -147,6 +151,7 @@
     "диван угловой бонент велюр серый|79 190 руб.|96 990 руб.|18%",
     "диван угловой бруквиль велюр серый|53 990 руб.|59 990 руб.|10%",
     "диван угловой вайвел п шенилл белый|72 990 руб.|89 990 руб.|19%",
+    "диван угловой вайвел п шенилл серый|44 990 руб.|89 990 руб.|50%",
     "диван угловой виена велюр оливковый|65 990 руб.|72 990 руб.|10%",
     "диван угловой виена велюр терракотовый|64 990 руб.|72 990 руб.|11%",
     "диван угловой виена|54 990 руб.|80 990 руб.|32%",
@@ -172,6 +177,7 @@
     "кровать кевия 180|56 690 руб.|102 990 руб.|45%",
     "кровать кевия 180|60 690 руб.|118 990 руб.|49%",
     "кровать кевия 200|59 990 руб.|91 990 руб.|35%",
+    "кровать кейла 80 велюр светло бежевый|22 990 руб.|34 990 руб.|34%",
     "кровать кейла 90 велюр голубой|37 990 руб.|43 990 руб.|14%",
     "кровать кейла 90|33 290 руб.|48 990 руб.|32%",
     "кровать кейла 90|35 990 руб.|56 990 руб.|37%",
@@ -208,6 +214,9 @@
     "этен|65 990 руб.|124 960 руб.|47%"
   ],
   "notified_keys": {
-    "кровать кейси 90|23 990 руб.|34 990 руб.|31%": 1783878061.4033065
+    "кровать кейси 90|23 990 руб.|34 990 руб.|31%": 1783878061.4033065,
+    "диван прямой аронт мини велюр серый|51 290 руб.|62 990 руб.|19%": 1783901733.0614371,
+    "диван угловой вайвел п шенилл серый|44 990 руб.|89 990 руб.|50%": 1783901733.0614371,
+    "кровать кейла 80 велюр светло бежевый|22 990 руб.|34 990 руб.|34%": 1783901733.0614371
   }
 }
