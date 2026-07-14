@@ -19,7 +19,7 @@
     "https://www.divan.ru/product/divan-pryamoj-dansta-velyur-svetlo-seryj-art--2003841627",
     "https://www.divan.ru/product/divan-pryamoj-ebi-gene-ocean-art--2004165252",
     "https://www.divan.ru/product/divan-pryamoj-ebi-happy-ocean-art--2004165249",
-    "https://www.divan.ru/product/divan-pryamoj-gardi-bukle-molochnyj-art--2003733920",
+    "https://www.divan.ru/product/divan-pryamoj-gardi-bukle-molochnyj-art--2003733921",
     "https://www.divan.ru/product/divan-pryamoj-kela-mini-art--2004116581",
     "https://www.divan.ru/product/divan-pryamoj-laronso-shenill-pesochnyj-art--2003658346",
     "https://www.divan.ru/product/divan-pryamoj-leri-art--vl000060933",
@@ -80,7 +80,7 @@
     "https://www.divan.ru/product/divan-uglovoj-onte-art--2004096220",
     "https://www.divan.ru/product/divan-uglovoj-onte-art--2004223753",
     "https://www.divan.ru/product/divan-uglovoj-staus-art--2003909390",
-    "https://www.divan.ru/product/divan-uglovoj-vajvel-p-shenill-belyj-art--2003851991",
+    "https://www.divan.ru/product/divan-uglovoj-vajvel-p-shenill-belyj-art--2003851993",
     "https://www.divan.ru/product/divan-uglovoj-vajvel-p-shenill-seryj-art--kz000027416",
     "https://www.divan.ru/product/divan-uglovoj-viena-art--2004206158",
     "https://www.divan.ru/product/divan-uglovoj-viena-velyur-olivkovyj-art--2003811764",
@@ -119,6 +119,7 @@
     "https://www.divan.ru/product/krovat-tabiya-90-shenill-molochnyj-art--2003400929",
     "https://www.divan.ru/product/krovat-tabiya-90-shenill-myatnyj-art--2003410225",
     "https://www.divan.ru/product/krovat-vajlor-p-140-velyur-seryj-art--2003806378",
+    "https://www.divan.ru/product/krovat-vilena-140-art--ek000076009",
     "https://www.divan.ru/product/modulnyj-divan-eten-art--2606",
     "https://www.divan.ru/product/modulnyj-divan-eten-art--2731",
     "https://www.divan.ru/product/modulnyj-divan-polan-1-art--2867"
@@ -207,6 +208,7 @@
     "диван угловой эдвин|79 990 руб.|88 990 руб.|10%",
     "кровать ассоль 120 букле молочный|36 990 руб.|54 990 руб.|33%",
     "кровать вайлор п 140 велюр серый|36 990 руб.|59 990 руб.|38%",
+    "кровать вилена 140|26 990 руб.|38 990 руб.|31%",
     "кровать дарлайн 90 серый|11 290 руб.|15 990 руб.|29%",
     "кровать кевия 160 шенилл серый|37 290 руб.|50 589 руб.|26%",
     "кровать кевия 180|56 690 руб.|102 990 руб.|45%",
@@ -248,8 +250,6 @@
     "этен|65 990 руб.|124 960 руб.|47%"
   ],
   "notified_keys": {
-    "диван прямой онте 2|101 990 руб.|113 990 руб.|11%": 1783943477.9934332,
-    "диван угловой эби 2|101 990 руб.|114 990 руб.|11%": 1783943477.9934332,
     "диван прямой онте букле серый|97 990 руб.|107 990 руб.|9%": 1783945287.4838943,
     "диван угловой дисент 2 велюр оливковый|114 990 руб.|125 990 руб.|9%": 1783957861.3279903,
     "диван угловой эби 2|134 990 руб.|149 990 руб.|10%": 1783959064.8509138,
@@ -275,6 +275,7 @@
     "кровать фромборк 2 140 светло бежевый|9 390 руб.|17 990 руб.|48%": 1784025701.4466553,
     "нолан 1 шенилл белый|33 180 руб.|83 980 руб.|60%": 1784025972.9770956,
     "диван прямой бонс т мех зеленый|35 390 руб.|59 990 руб.|41%": 1784025972.9770956,
-    "диван прямой данста|46 190 руб.|75 990 руб.|39%": 1784025972.9770956
+    "диван прямой данста|46 190 руб.|75 990 руб.|39%": 1784025972.9770956,
+    "кровать вилена 140|26 990 руб.|38 990 руб.|31%": 1784029882.6298425
   }
 }
