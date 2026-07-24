@@ -49,7 +49,7 @@
     "https://www.divan.ru/product/divan-uglovoj-bonent-velyur-seryj-art--2003841762",
     "https://www.divan.ru/product/divan-uglovoj-bonent-velyur-seryj-art--2003862234",
     "https://www.divan.ru/product/divan-uglovoj-brukvil-velyur-seryj-art--2003862267",
-    "https://www.divan.ru/product/divan-uglovoj-darol-velvet-korichnevyj-art--2003771620",
+    "https://www.divan.ru/product/divan-uglovoj-darol-velvet-korichnevyj-art--2003771618",
     "https://www.divan.ru/product/divan-uglovoj-darol-velvet-latte-art--2003875936",
     "https://www.divan.ru/product/divan-uglovoj-darol-velvet-latte-art--2003875937",
     "https://www.divan.ru/product/divan-uglovoj-darol-velvet-svetlo-seryj-art--2003811819",
@@ -74,7 +74,7 @@
     "https://www.divan.ru/product/divan-uglovoj-lilt-art--2003854524",
     "https://www.divan.ru/product/divan-uglovoj-lilt-art--2004204516",
     "https://www.divan.ru/product/divan-uglovoj-lilt-velyur-temno-sinij-art--2003851997",
-    "https://www.divan.ru/product/divan-uglovoj-lilt-velyur-temno-sinij-art--2003868592",
+    "https://www.divan.ru/product/divan-uglovoj-lilt-velyur-temno-sinij-art--2003851998",
     "https://www.divan.ru/product/divan-uglovoj-misl-1-velyur-bejevyj-art--2003791400",
     "https://www.divan.ru/product/divan-uglovoj-nordika-mini-velyur-olivkovyj-art--2003857145",
     "https://www.divan.ru/product/divan-uglovoj-numo-velyur-svetlo-seryj-art--2003876138",
@@ -112,7 +112,7 @@
     "https://www.divan.ru/product/krovat-lajtsi-90-art--2003586636",
     "https://www.divan.ru/product/krovat-loriya-120-velyur-svetlo-bejevyj-art--2003347658",
     "https://www.divan.ru/product/krovat-loriya-120-velyur-svetlo-bejevyj-art--2003347661",
-    "https://www.divan.ru/product/krovat-loriya-80-velyur-svetlo-bejevyj-art--2002909369",
+    "https://www.divan.ru/product/krovat-loriya-80-velyur-svetlo-bejevyj-art--2003209079",
     "https://www.divan.ru/product/krovat-loriya-80-velyur-svetlo-bejevyj-art--2003209080",
     "https://www.divan.ru/product/krovat-loriya-90-velyur-grafitovyj-art--2003513228",
     "https://www.divan.ru/product/krovat-loriya-90-velyur-korichnevyj-art--2003347643",
@@ -232,7 +232,7 @@
     "кровать лайтси 90|12 190 руб.|44 990 руб.|73%",
     "кровать лория 120 велюр светло бежевый|20 990 руб.|53 290 руб.|61%",
     "кровать лория 120 велюр светло бежевый|27 490 руб.|53 290 руб.|48%",
-    "кровать лория 80 велюр светло бежевый|21 890 руб.|49 590 руб.|56%",
+    "кровать лория 80 велюр светло бежевый|21 890 руб.|42 990 руб.|49%",
     "кровать лория 80 велюр светло бежевый|23 390 руб.|42 990 руб.|46%",
     "кровать лория 90 велюр графитовый|26 990 руб.|43 990 руб.|39%",
     "кровать лория 90 велюр коричневый|22 690 руб.|43 990 руб.|48%",
@@ -261,8 +261,6 @@
     "этен|65 860 руб.|124 960 руб.|47%"
   ],
   "notified_keys": {
-    "кровать лория 80 велюр светло бежевый|21 890 руб.|49 590 руб.|56%": 1784791847.0835755,
-    "диван угловой льери|61 990 руб.|118 990 руб.|48%": 1784791847.0835755,
     "диван прямой бонс т|39 990 руб.|44 990 руб.|11%": 1784799939.6736004,
     "диван прямой эби мини|51 990 руб.|72 990 руб.|29%": 1784802035.6924684,
     "диван угловой лилт|67 990 руб.|99 990 руб.|32%": 1784803831.52988,
@@ -270,6 +268,7 @@
     "диван прямой тилар|34 990 руб.|47 990 руб.|27%": 1784811034.3203247,
     "диван прямой эби мини|46 990 руб.|65 990 руб.|29%": 1784811034.3203247,
     "диван угловой спейс 1|67 990 руб.|106 990 руб.|36%": 1784812836.9244933,
-    "диван прямой бонс т|39 990 руб.|43 990 руб.|9%": 1784821230.976464
+    "диван прямой бонс т|39 990 руб.|43 990 руб.|9%": 1784821230.976464,
+    "кровать лория 80 велюр светло бежевый|21 890 руб.|42 990 руб.|49%": 1784878252.1697392
   }
 }
