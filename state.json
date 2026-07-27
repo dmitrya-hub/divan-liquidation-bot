@@ -2,7 +2,6 @@
   "seen": [
     "https://www.divan.ru/product/divan-modulnyj-aldi-1-art--2708",
     "https://www.divan.ru/product/divan-modulnyj-eten-velvet-terrakotovyj-art--2703",
-    "https://www.divan.ru/product/divan-modulnyj-mail-1-art--2601",
     "https://www.divan.ru/product/divan-modulnyj-mail-1-bucle-beige-art--2444",
     "https://www.divan.ru/product/divan-modulnyj-nolan-1-shenill-belyj-art--2741",
     "https://www.divan.ru/product/divan-modulnyj-polan-1-velyur-molochnyj-art--2906",
@@ -101,6 +100,7 @@
     "https://www.divan.ru/product/krovat-foster-160-soft-night-art--2003288242",
     "https://www.divan.ru/product/krovat-foster-180-art--2004239448",
     "https://www.divan.ru/product/krovat-foster-180-soft-toffe-art--2003347963",
+    "https://www.divan.ru/product/krovat-haruto-180-naturalnyj-art--2003735121",
     "https://www.divan.ru/product/krovat-kejla-120-art--2004176253",
     "https://www.divan.ru/product/krovat-kejla-120-velyur-svetlo-rozovyj-art--2004176191",
     "https://www.divan.ru/product/krovat-kejla-90-art--2003805218",
@@ -121,6 +121,7 @@
     "https://www.divan.ru/product/krovat-loriya-90-velyur-grafitovyj-art--2003513228",
     "https://www.divan.ru/product/krovat-loriya-90-velyur-seryj-art--2003505956",
     "https://www.divan.ru/product/krovat-loriya-90-velyur-seryj-art--2003513229",
+    "https://www.divan.ru/product/krovat-milton-90-velyur-terrakotovyj-art--2004206945",
     "https://www.divan.ru/product/krovat-sherona-n-90-art--2004242220",
     "https://www.divan.ru/product/krovat-slipson-160-art--2004090777",
     "https://www.divan.ru/product/krovat-tabiya-90-art--2003763475",
@@ -245,6 +246,7 @@
     "кровать лория 90 велюр графитовый|26 990 руб.|43 990 руб.|39%",
     "кровать лория 90 велюр серый|25 190 руб.|43 990 руб.|43%",
     "кровать лория 90 велюр серый|26 990 руб.|43 990 руб.|39%",
+    "кровать милтон 90 велюр терракотовый|22 990 руб.|35 990 руб.|36%",
     "кровать слипсон 160|42 990 руб.|61 990 руб.|31%",
     "кровать табия 90 шенилл молочный|62 990 руб.|69 990 руб.|10%",
     "кровать табия 90 шенилл мятный|42 990 руб.|65 990 руб.|35%",
@@ -253,9 +255,9 @@
     "кровать фостер 160 шенилл темно синий|29 990 руб.|42 990 руб.|30%",
     "кровать фостер 180 soft toffe|39 990 руб.|69 990 руб.|43%",
     "кровать фостер 180|56 990 руб.|86 990 руб.|34%",
+    "кровать харуто 180 натуральный|36 990 руб.|44 990 руб.|18%",
     "кровать шерона н 90|27 990 руб.|44 990 руб.|38%",
     "маиль 1 bucle beige|99 990 руб.|167 970 руб.|40%",
-    "маиль 1|83 670 руб.|171 970 руб.|51%",
     "нолан 1 шенилл белый|33 180 руб.|83 980 руб.|60%",
     "полан 1 велюр молочный|47 990 руб.|82 970 руб.|42%",
     "спейс м 1|92 850 руб.|203 950 руб.|54%",
@@ -296,6 +298,8 @@
     "кровать шерона н 90|27 990 руб.|44 990 руб.|38%": 1785160235.1843581,
     "кровать далти 180|49 990 руб.|79 990 руб.|38%": 1785162035.8722334,
     "кровать бэсти 120 велюр серый|23 990 руб.|36 990 руб.|35%": 1785165634.8975945,
-    "кровать кейси 90|26 990 руб.|38 990 руб.|31%": 1785165634.8975945
+    "кровать кейси 90|26 990 руб.|38 990 руб.|31%": 1785165634.8975945,
+    "кровать милтон 90 велюр терракотовый|22 990 руб.|35 990 руб.|36%": 1785172535.3511016,
+    "кровать харуто 180 натуральный|36 990 руб.|44 990 руб.|18%": 1785172535.3511016
   }
 }
