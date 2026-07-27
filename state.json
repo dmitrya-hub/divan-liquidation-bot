@@ -14,6 +14,7 @@
     "https://www.divan.ru/product/divan-pryamoj-brukvil-velyur-svetlo-seryj-art--2003836514",
     "https://www.divan.ru/product/divan-pryamoj-dansta-art--2004203002",
     "https://www.divan.ru/product/divan-pryamoj-ebi-happy-ocean-art--2004165249",
+    "https://www.divan.ru/product/divan-pryamoj-ebi-mini-art--2004224844",
     "https://www.divan.ru/product/divan-pryamoj-ebi-mini-art--2004232061",
     "https://www.divan.ru/product/divan-pryamoj-fils-art--2004218659",
     "https://www.divan.ru/product/divan-pryamoj-fils-mini-120-velyur-terrakotovyj-art--2003900832",
@@ -37,7 +38,6 @@
     "https://www.divan.ru/product/divan-pryamoj-numo-art--2004219879",
     "https://www.divan.ru/product/divan-pryamoj-onte-2-art--2003854531",
     "https://www.divan.ru/product/divan-pryamoj-onte-bukle-seryj-art--2003852308",
-    "https://www.divan.ru/product/divan-pryamoj-rejli-velyur-myata-art--2003404813",
     "https://www.divan.ru/product/divan-pryamoj-ribbl-1-art--2004191839",
     "https://www.divan.ru/product/divan-pryamoj-rien-velyur-korichnevyj-art--2004009460",
     "https://www.divan.ru/product/divan-pryamoj-rotterdam-3-art--vl000061598",
@@ -163,7 +163,6 @@
     "диван прямой нумо|33 990 руб.|46 990 руб.|28%",
     "диван прямой онте 2|91 790 руб.|113 990 руб.|19%",
     "диван прямой онте букле серый|88 190 руб.|107 990 руб.|18%",
-    "диван прямой рейли велюр мята|32 990 руб.|36 990 руб.|11%",
     "диван прямой риббл 1|46 990 руб.|77 990 руб.|40%",
     "диван прямой риен велюр коричневый|49 990 руб.|62 990 руб.|21%",
     "диван прямой роттердам 3|27 890 руб.|46 990 руб.|41%",
@@ -174,6 +173,7 @@
     "диван прямой филс мини 120 велюр терракотовый|19 990 руб.|29 990 руб.|33%",
     "диван прямой филс|39 990 руб.|50 990 руб.|22%",
     "диван прямой эби happy ocean|50 390 руб.|69 990 руб.|28%",
+    "диван прямой эби мини|46 990 руб.|65 990 руб.|29%",
     "диван прямой эби мини|51 990 руб.|72 990 руб.|29%",
     "диван угловой амрано|36 990 руб.|46 990 руб.|21%",
     "диван угловой аронт мини|53 990 руб.|74 990 руб.|28%",
@@ -286,6 +286,7 @@
     "диван прямой онте букле серый|88 190 руб.|107 990 руб.|18%": 1785145833.7078278,
     "диван прямой онте 2|91 790 руб.|113 990 руб.|19%": 1785145833.7078278,
     "диван угловой эби 2|91 790 руб.|114 990 руб.|20%": 1785145833.7078278,
-    "диван прямой виенсо мех терракотовый|63 990 руб.|79 990 руб.|20%": 1785147630.2476175
+    "диван прямой виенсо мех терракотовый|63 990 руб.|79 990 руб.|20%": 1785147630.2476175,
+    "диван прямой эби мини|46 990 руб.|65 990 руб.|29%": 1785152735.3161366
   }
 }
