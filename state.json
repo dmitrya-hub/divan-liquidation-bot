@@ -53,7 +53,6 @@
     "https://www.divan.ru/product/divan-uglovoj-brukvil-velyur-seryj-art--2003862267",
     "https://www.divan.ru/product/divan-uglovoj-darol-velvet-korichnevyj-art--2003771620",
     "https://www.divan.ru/product/divan-uglovoj-darol-velvet-latte-art--2003875937",
-    "https://www.divan.ru/product/divan-uglovoj-darol-velvet-svetlo-seryj-art--2003811819",
     "https://www.divan.ru/product/divan-uglovoj-disent-1-art--2003851713",
     "https://www.divan.ru/product/divan-uglovoj-disent-1-art--2003851714",
     "https://www.divan.ru/product/divan-uglovoj-disent-1-art--2003940418",
@@ -102,6 +101,8 @@
     "https://www.divan.ru/product/krovat-kejsi-90-art--2004188940",
     "https://www.divan.ru/product/krovat-kejsi-90-art--2004223351",
     "https://www.divan.ru/product/krovat-keviya-160-art--2004191943",
+    "https://www.divan.ru/product/krovat-keviya-180-art--kz000027998",
+    "https://www.divan.ru/product/krovat-keviya-200-art--2004118864",
     "https://www.divan.ru/product/krovat-koverti-160-art--2004176292",
     "https://www.divan.ru/product/krovat-lajtsi-90-art--2003586636",
     "https://www.divan.ru/product/krovat-loriya-120-velyur-svetlo-bejevyj-art--2003347658",
@@ -116,7 +117,6 @@
     "https://www.divan.ru/product/krovat-tabiya-90-art--2003763475",
     "https://www.divan.ru/product/krovat-tabiya-90-shenill-molochnyj-art--2003400929",
     "https://www.divan.ru/product/krovat-tabiya-90-shenill-myatnyj-art--2003410225",
-    "https://www.divan.ru/product/krovat-vajlor-p-140-velyur-seryj-art--2003806378",
     "https://www.divan.ru/product/modulnyj-divan-eten-5-art--2895",
     "https://www.divan.ru/product/modulnyj-divan-eten-5-art--2905",
     "https://www.divan.ru/product/modulnyj-divan-eten-art--2606",
@@ -178,7 +178,6 @@
     "диван угловой виена велюр терракотовый|64 990 руб.|72 990 руб.|11%",
     "диван угловой дарол вельвет коричневый|65 990 руб.|72 990 руб.|10%",
     "диван угловой дарол вельвет латте|66 990 руб.|73 990 руб.|9%",
-    "диван угловой дарол вельвет светло серый|53 490 руб.|72 990 руб.|27%",
     "диван угловой дисент 1|110 990 руб.|122 990 руб.|10%",
     "диван угловой дисент 1|71 990 руб.|119 990 руб.|40%",
     "диван угловой дисент 1|97 990 руб.|105 990 руб.|8%",
@@ -208,9 +207,10 @@
     "диван угловой эдвин|79 990 руб.|88 990 руб.|10%",
     "кровать бэсти 120 велюр серый|23 990 руб.|36 990 руб.|35%",
     "кровать бэсти 160 велюр серый|29 990 руб.|41 990 руб.|29%",
-    "кровать вайлор п 140 велюр серый|36 990 руб.|59 990 руб.|38%",
     "кровать далти 180|49 990 руб.|79 990 руб.|38%",
     "кровать кевия 160|47 990 руб.|71 990 руб.|33%",
+    "кровать кевия 180|50 990 руб.|102 990 руб.|50%",
+    "кровать кевия 200|53 990 руб.|91 990 руб.|41%",
     "кровать кейла 120 велюр светло розовый|27 990 руб.|41 990 руб.|33%",
     "кровать кейла 120|30 990 руб.|53 290 руб.|42%",
     "кровать кейла 90 велюр голубой|37 990 руб.|43 990 руб.|14%",
@@ -250,6 +250,7 @@
     "диван прямой дисент|66 990 руб.|86 990 руб.|23%": 1785252038.3354251,
     "диван прямой роттердам 3|30 990 руб.|46 990 руб.|34%": 1785252038.3354251,
     "кровать кевия 180|50 990 руб.|102 990 руб.|50%": 1785265539.4897575,
-    "диван прямой брера 9 букле бежевый|40 090 руб.|92 990 руб.|57%": 1785282338.7057476
+    "диван прямой брера 9 букле бежевый|40 090 руб.|92 990 руб.|57%": 1785282338.7057476,
+    "кровать кевия 200|53 990 руб.|91 990 руб.|41%": 1785314446.1478336
   }
 }
