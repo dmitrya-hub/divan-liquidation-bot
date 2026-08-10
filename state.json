@@ -41,7 +41,7 @@
     "https://www.divan.ru/product/divan-pryamoj-vienso-art--2004202958",
     "https://www.divan.ru/product/divan-pryamoj-vienso-meh-terrakotovyj-art--2002942791",
     "https://www.divan.ru/product/divan-pryamoj-vinsi-art--2004137744",
-    "https://www.divan.ru/product/divan-pryamoj-vinsi-rogojka-gorchichnyj-art--2004165256",
+    "https://www.divan.ru/product/divan-pryamoj-vinsi-rogojka-gorchichnyj-art--2004165257",
     "https://www.divan.ru/product/divan-pryamoj-vinsi-textile-yellow-art--2004165259",
     "https://www.divan.ru/product/divan-uglovoj-allaum-art--2004252071",
     "https://www.divan.ru/product/divan-uglovoj-amrano-art--2004228560",
@@ -61,7 +61,7 @@
     "https://www.divan.ru/product/divan-uglovoj-kirmas-1-art--2004232667",
     "https://www.divan.ru/product/divan-uglovoj-klajmar-art--2003906654",
     "https://www.divan.ru/product/divan-uglovoj-laronso-art--2003854533",
-    "https://www.divan.ru/product/divan-uglovoj-leri-velyur-bejevyj-art--2003780839",
+    "https://www.divan.ru/product/divan-uglovoj-leri-velyur-bejevyj-art--2003770465",
     "https://www.divan.ru/product/divan-uglovoj-lilt-art--2003854524",
     "https://www.divan.ru/product/divan-uglovoj-lilt-velyur-temno-sinij-art--2003851998",
     "https://www.divan.ru/product/divan-uglovoj-lilt-velyur-temno-sinij-art--2003868592",
@@ -89,7 +89,7 @@
     "https://www.divan.ru/product/krovat-keviya-180-art--kz000027998",
     "https://www.divan.ru/product/krovat-keviya-200-art--2004118864",
     "https://www.divan.ru/product/krovat-koverti-160-art--2004176292",
-    "https://www.divan.ru/product/krovat-loriya-80-velyur-svetlo-bejevyj-art--2002909369",
+    "https://www.divan.ru/product/krovat-loriya-80-velyur-svetlo-bejevyj-art--2003209079",
     "https://www.divan.ru/product/krovat-loriya-80-velyur-svetlo-bejevyj-art--2003209080",
     "https://www.divan.ru/product/krovat-loriya-90-velyur-seryj-art--2003513229",
     "https://www.divan.ru/product/krovat-sherona-n-90-art--2004242220",
@@ -180,7 +180,7 @@
     "кровать кейси 90|23 990 руб.|34 990 руб.|31%",
     "кровать кейси 90|26 990 руб.|38 990 руб.|31%",
     "кровать коверти 160|39 990 руб.|62 290 руб.|36%",
-    "кровать лория 80 велюр светло бежевый|21 890 руб.|49 590 руб.|56%",
+    "кровать лория 80 велюр светло бежевый|21 890 руб.|42 990 руб.|49%",
     "кровать лория 80 велюр светло бежевый|23 390 руб.|42 990 руб.|46%",
     "кровать лория 90 велюр серый|26 990 руб.|43 990 руб.|39%",
     "кровать слипсон 160|39 990 руб.|62 990 руб.|37%",
@@ -200,6 +200,7 @@
     "этен|41 270 руб.|83 970 руб.|51%"
   ],
   "notified_keys": {
-    "кровать лория 80 велюр светло бежевый|21 890 руб.|49 590 руб.|56%": 1786320064.366937
+    "кровать лория 80 велюр светло бежевый|21 890 руб.|49 590 руб.|56%": 1786320064.366937,
+    "кровать лория 80 велюр светло бежевый|21 890 руб.|42 990 руб.|49%": 1786366235.3881204
   }
 }
