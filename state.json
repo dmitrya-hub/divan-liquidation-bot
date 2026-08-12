@@ -4,7 +4,6 @@
     "https://www.divan.ru/product/divan-modulnyj-nolan-1-shenill-latte-art--2740",
     "https://www.divan.ru/product/divan-modulnyj-spejs-m-1-art--2883",
     "https://www.divan.ru/product/divan-modulnyj-spejs-m-3-art--2499",
-    "https://www.divan.ru/product/divan-pryamoj-aront-mini-velyur-seryj-art--2003841439",
     "https://www.divan.ru/product/divan-pryamoj-aront-mini-velyur-svetlo-seryj-art--2003903357",
     "https://www.divan.ru/product/divan-pryamoj-biani-barhat-latte-art--2002647800",
     "https://www.divan.ru/product/divan-pryamoj-bons-t-art--2003846476",
@@ -13,6 +12,7 @@
     "https://www.divan.ru/product/divan-pryamoj-ebi-gene-ocean-art--2004165251",
     "https://www.divan.ru/product/divan-pryamoj-ebi-mini-art--2004224844",
     "https://www.divan.ru/product/divan-pryamoj-ebi-mini-art--2004232061",
+    "https://www.divan.ru/product/divan-pryamoj-fils-art--2004218659",
     "https://www.divan.ru/product/divan-pryamoj-gardi-bukle-molochnyj-art--2003733921",
     "https://www.divan.ru/product/divan-pryamoj-ines-art--2003940413",
     "https://www.divan.ru/product/divan-pryamoj-kela-mini-art--2004116581",
@@ -25,6 +25,7 @@
     "https://www.divan.ru/product/divan-pryamoj-londi-meh-zelenyj-art--2003938020",
     "https://www.divan.ru/product/divan-pryamoj-mail-3nrl-art--2004096218",
     "https://www.divan.ru/product/divan-pryamoj-melou-art--2003906652",
+    "https://www.divan.ru/product/divan-pryamoj-numo-velyur-latte-art--2003615342",
     "https://www.divan.ru/product/divan-pryamoj-olen-mini-velvet-gorchichnyj-art--kr000062019",
     "https://www.divan.ru/product/divan-pryamoj-olen-velyur-latte-art--2004235341",
     "https://www.divan.ru/product/divan-pryamoj-onte-2-art--2003854531",
@@ -95,7 +96,6 @@
   "seen_keys": [
     "альди 1|67 990 руб.|133 980 руб.|49%",
     "диван прямой аронт мини велюр светло серый|56 990 руб.|62 990 руб.|10%",
-    "диван прямой аронт мини велюр серый|56 990 руб.|62 990 руб.|10%",
     "диван прямой биани велюр латте|36 990 руб.|40 700 руб.|9%",
     "диван прямой бонс т|39 990 руб.|43 990 руб.|9%",
     "диван прямой бруквиль велюр светло серый|53 990 руб.|59 990 руб.|10%",
@@ -116,6 +116,7 @@
     "диван прямой льери|114 990 руб.|129 990 руб.|12%",
     "диван прямой маиль 3нрл|62 090 руб.|85 990 руб.|28%",
     "диван прямой мелоу|69 990 руб.|78 990 руб.|11%",
+    "диван прямой нумо велюр латте|35 990 руб.|39 990 руб.|10%",
     "диван прямой ольен велюр латте|54 990 руб.|66 990 руб.|18%",
     "диван прямой ольен мини вельвет горчичный|47 990 руб.|59 990 руб.|20%",
     "диван прямой онте 2|91 790 руб.|113 990 руб.|19%",
@@ -123,6 +124,7 @@
     "диван прямой риен велюр коричневый|49 990 руб.|62 990 руб.|21%",
     "диван прямой роттердам|34 990 руб.|38 990 руб.|10%",
     "диван прямой самми|32 990 руб.|39 990 руб.|18%",
+    "диван прямой филс|39 990 руб.|50 990 руб.|22%",
     "диван прямой эби gene ocean|50 390 руб.|69 990 руб.|28%",
     "диван прямой эби мини|46 990 руб.|65 990 руб.|29%",
     "диван прямой эби мини|51 990 руб.|72 990 руб.|29%",
@@ -188,6 +190,8 @@
   "notified_keys": {
     "диван прямой бонс т|39 990 руб.|44 990 руб.|11%": 1786465848.997576,
     "кровать лория 80 велюр светло бежевый|21 890 руб.|49 590 руб.|56%": 1786531832.9902072,
-    "диван угловой спейс 2|77 990 руб.|112 990 руб.|31%": 1786537848.592762
+    "диван угловой спейс 2|77 990 руб.|112 990 руб.|31%": 1786537848.592762,
+    "диван прямой нумо велюр латте|35 990 руб.|39 990 руб.|10%": 1786548686.1607223,
+    "диван прямой филс|39 990 руб.|50 990 руб.|22%": 1786548686.1607223
   }
 }
