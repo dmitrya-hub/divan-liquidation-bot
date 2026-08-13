@@ -34,7 +34,6 @@
     "https://www.divan.ru/product/divan-pryamoj-rien-velyur-korichnevyj-art--2004009460",
     "https://www.divan.ru/product/divan-pryamoj-rotterdam-art--2003854364",
     "https://www.divan.ru/product/divan-pryamoj-sammi-art--2004153100",
-    "https://www.divan.ru/product/divan-pryamoj-viena-art--kz000022385",
     "https://www.divan.ru/product/divan-pryamoj-vienso-art--2004202958",
     "https://www.divan.ru/product/divan-pryamoj-vienso-meh-terrakotovyj-art--2002942791",
     "https://www.divan.ru/product/divan-pryamoj-vinsi-rogojka-gorchichnyj-art--2004165257",
@@ -59,6 +58,7 @@
     "https://www.divan.ru/product/divan-uglovoj-laronso-art--2003854533",
     "https://www.divan.ru/product/divan-uglovoj-leri-velyur-bejevyj-art--2003770465",
     "https://www.divan.ru/product/divan-uglovoj-lilt-art--2003854524",
+    "https://www.divan.ru/product/divan-uglovoj-lilt-velyur-temno-sinij-art--2003851998",
     "https://www.divan.ru/product/divan-uglovoj-lilt-velyur-temno-sinij-art--2003868592",
     "https://www.divan.ru/product/divan-uglovoj-misl-1-velyur-bejevyj-art--2003791400",
     "https://www.divan.ru/product/divan-uglovoj-nordika-mini-velyur-olivkovyj-art--2003857145",
@@ -99,7 +99,6 @@
     "диван прямой биани велюр латте|36 990 руб.|40 700 руб.|9%",
     "диван прямой бонс т|39 990 руб.|43 990 руб.|9%",
     "диван прямой бруквиль велюр светло серый|53 990 руб.|59 990 руб.|10%",
-    "диван прямой виена|46 990 руб.|84 990 руб.|45%",
     "диван прямой виенсо мех терракотовый|63 990 руб.|79 990 руб.|20%",
     "диван прямой виенсо|49 990 руб.|78 990 руб.|37%",
     "диван прямой винси textile yellow|17 990 руб.|23 990 руб.|25%",
@@ -147,6 +146,7 @@
     "диван угловой кирмас 1|59 990 руб.|73 990 руб.|19%",
     "диван угловой клаймар|69 990 руб.|77 990 руб.|10%",
     "диван угловой ларонсо|171 990 руб.|193 990 руб.|11%",
+    "диван угловой лилт велюр темно синий|71 990 руб.|88 990 руб.|19%",
     "диван угловой лилт велюр темно синий|79 990 руб.|88 990 руб.|10%",
     "диван угловой лилт|80 990 руб.|99 990 руб.|19%",
     "диван угловой льери велюр бежевый|97 990 руб.|108 990 руб.|10%",
@@ -191,6 +191,7 @@
     "диван прямой аронт мини велюр серый|56 990 руб.|62 990 руб.|10%": 1786550461.505451,
     "диван прямой бонс т|39 990 руб.|43 990 руб.|9%": 1786572357.492061,
     "кровать лория 80 велюр светло бежевый|21 890 руб.|42 990 руб.|49%": 1786616343.0663161,
-    "диван прямой виена|46 990 руб.|84 990 руб.|45%": 1786624843.6082022
+    "диван прямой виена|46 990 руб.|84 990 руб.|45%": 1786624843.6082022,
+    "диван угловой лилт велюр темно синий|71 990 руб.|88 990 руб.|19%": 1786625137.5763211
   }
 }
