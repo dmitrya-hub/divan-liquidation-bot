@@ -15,7 +15,6 @@
     "https://www.divan.ru/product/divan-pryamoj-gardi-bukle-molochnyj-art--2003733921",
     "https://www.divan.ru/product/divan-pryamoj-kela-mini-art--2004116581",
     "https://www.divan.ru/product/divan-pryamoj-klajmar-art--2003906651",
-    "https://www.divan.ru/product/divan-pryamoj-leri-art--2003877782",
     "https://www.divan.ru/product/divan-pryamoj-leri-velyur-bejevyj-art--2003862172",
     "https://www.divan.ru/product/divan-pryamoj-londi-meh-korichnevyj-art--2003771821",
     "https://www.divan.ru/product/divan-pryamoj-londi-meh-terrakotovyj-art--2003040150",
@@ -73,6 +72,7 @@
     "https://www.divan.ru/product/krovat-kejsi-90-art--2004223351",
     "https://www.divan.ru/product/krovat-keviya-160-art--2004191943",
     "https://www.divan.ru/product/krovat-keviya-180-art--kz000027998",
+    "https://www.divan.ru/product/krovat-keviya-200-art--2004118864",
     "https://www.divan.ru/product/krovat-loriya-80-velyur-svetlo-bejevyj-art--2002909369",
     "https://www.divan.ru/product/krovat-loriya-80-velyur-svetlo-bejevyj-art--2003209080",
     "https://www.divan.ru/product/krovat-loriya-90-velyur-seryj-art--2003513229",
@@ -101,7 +101,6 @@
     "диван прямой лонди мех коричневый|34 990 руб.|52 990 руб.|34%",
     "диван прямой лонди мех терракотовый|37 790 руб.|52 990 руб.|29%",
     "диван прямой льери велюр бежевый|86 990 руб.|94 990 руб.|8%",
-    "диван прямой льери|114 990 руб.|129 990 руб.|12%",
     "диван прямой маиль 3нрл|62 090 руб.|85 990 руб.|28%",
     "диван прямой мелоу|69 990 руб.|78 990 руб.|11%",
     "диван прямой нумо велюр латте|35 990 руб.|39 990 руб.|10%",
@@ -148,6 +147,7 @@
     "кровать далти 180|49 990 руб.|79 990 руб.|38%",
     "кровать кевия 160|47 990 руб.|71 990 руб.|33%",
     "кровать кевия 180|50 990 руб.|102 990 руб.|50%",
+    "кровать кевия 200|53 990 руб.|91 990 руб.|41%",
     "кровать кейла 90 велюр голубой|37 990 руб.|43 990 руб.|14%",
     "кровать кейси 90|26 990 руб.|38 990 руб.|31%",
     "кровать лория 80 велюр светло бежевый|21 890 руб.|49 590 руб.|56%",
@@ -174,6 +174,7 @@
     "кровать лория 80 велюр светло бежевый|21 890 руб.|49 590 руб.|56%": 1786810230.0516918,
     "диван прямой инес|39 990 руб.|54 990 руб.|27%": 1786823485.0599313,
     "кровать лория 90 велюр серый|26 990 руб.|43 990 руб.|39%": 1786823728.4840143,
-    "диван прямой льери|114 990 руб.|129 990 руб.|12%": 1786824634.9379861
+    "диван прямой льери|114 990 руб.|129 990 руб.|12%": 1786824634.9379861,
+    "кровать кевия 200|53 990 руб.|91 990 руб.|41%": 1786824933.83677
   }
 }
